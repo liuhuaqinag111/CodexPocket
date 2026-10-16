@@ -1,0 +1,9 @@
+dagre-d3-es 7.0.10 declares MIT in its npm package metadata. Its published
+archive and source commit f14d9a1a7dd13d2448b86e4aa8e496e1e585596a do not
+contain a standalone license file. The package incorporates the Dagre-D3,
+Dagre and Graphlib source families. Their original MIT notices are retained
+here as dagre-d3-LICENSE, dagre-LICENSE and graphlib-LICENSE.
+
+Package metadata: https://registry.npmjs.org/dagre-d3-es/7.0.10
+Original notices were obtained from the official npm distributions:
+dagre-d3 0.6.4, dagre 0.8.5 and graphlib 2.1.8.

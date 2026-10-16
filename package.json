@@ -1,0 +1,20 @@
+{
+  "name": "codexpocket-connector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Connect your own Codex on Windows or macOS to CodexPocket for iPhone.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node connector/cli.mjs start --open",
+    "doctor": "node connector/cli.mjs doctor",
+    "test": "node scripts/test.mjs"
+  },
+  "dependencies": {
+    "qrcode-generator": "1.4.4",
+    "ws": "8.21.3"
+  }
+}

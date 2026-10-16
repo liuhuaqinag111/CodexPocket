@@ -1,0 +1,75 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+const root=new URL('../',import.meta.url),run=promisify(execFile);
+const read=async name=>fs.readFile(new URL(name,root),'utf8').catch(e=>{if(e.code==='ENOENT')return '';throw e;});
+test('macOS service uses argument arrays and only its user LaunchAgent',async()=>{
+ const source=await read('packaging/macos/service.mjs');
+ assert.ok(source,'macOS installer is present');
+ const {servicePlan}=await import('../packaging/macos/service.mjs');
+ const p=servicePlan({home:'/Users/Test User & Name',uid:501,packageDir:'/tmp/Extracted Package'});
+ assert.equal(p.domain,'gui/501');
+ assert.equal(p.label,'app.codexpocket.connector');
+ assert.deepEqual(p.args.slice(-3),['start','--data-dir',path.join('/Users/Test User & Name','Library','Application Support','CodexPocketConnector')]);
+ assert.ok(p.plist.includes('Test User &amp; Name'));
+ assert.ok(!p.args.includes('--open'));
+ assert.match(p.plist,/<key>EnvironmentVariables<\/key>/);
+});
+test('Windows launcher keeps paths quoted and tasks limited to the current user',async()=>{
+ const ps=await read('packaging/windows/service.ps1');
+ assert.ok(ps,'Windows installer is present');
+ assert.match(ps,/WindowsIdentity/);assert.match(ps,/-LogonType Interactive/);
+ assert.match(ps,/-RunLevel Limited/);assert.match(ps,/CodexPocketConnector-/);
+ assert.match(ps,/Assert-OwnedTask/);assert.doesNotMatch(ps,/Stop-Process|taskkill|SYSTEM|RunLevel Highest/i);
+ const cmd=await read('packaging/windows/Install.cmd');
+ assert.match(cmd,/-File "%~dp0packaging\\windows\\service.ps1"/);
+ assert.match(cmd,/-Action install/);
+});
+test('macOS refuses a similarly named executable in an unrelated job',async()=>{
+ const {servicePlan,ownsService}=await import('../packaging/macos/service.mjs');
+ assert.equal(typeof ownsService,'function');
+ const p=servicePlan({home:'/Users/Test User',uid:501});
+ const output='program = '+p.node+'\narguments = {\n  '+p.node+'\n  '+p.cli+'\n  start\n}';
+ assert.ok(ownsService(p,output));
+ assert.ok(!ownsService(p,output.replace(p.cli,p.cli+'.backup')));
+ assert.ok(!ownsService(p,output.replace('program = '+p.node,'program = /usr/bin/node')));
+});
+test('packaging allowlist excludes personal files and includes only production dependencies',async()=>{
+ const source=await read('scripts/build-connector.mjs');assert.ok(source,'packager is present');
+ const {packageFiles}=await import('./build-connector.mjs');
+ const files=await packageFiles(new URL('..',import.meta.url));
+ assert.ok(files.includes('app/connector/cli.mjs'));
+ assert.ok(files.includes('app/bridge/bridge.mjs'));
+ assert.ok(files.includes('app/bridge/ui.html'));
+ assert.ok(files.includes('app/node_modules/ws/package.json'));
+ assert.ok(files.every(f=>!/(work\/|\.codex\/|\.test\.|fixtures\/|token|outputs\/)/.test(f)));
+ assert.ok(!files.some(f=>f.includes('postject')));
+});
+test('desktop packages include the complete third-party notices and license tree',async()=>{
+ const {packageMetadata}=await import('./build-connector.mjs');
+ assert.equal(typeof packageMetadata,'function');
+ const files=await packageMetadata(new URL('..',import.meta.url));
+ for(const file of ['THIRD_PARTY_NOTICES.md','licenses/node/LICENSE','licenses/ws/LICENSE','licenses/qrcode-generator/LICENSE'])assert.ok(files.includes(file),file);
+});
+test('macOS ZIP runs its bundled Node and CLI from a path containing spaces',{skip:process.platform!=='darwin'},async t=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pocket package smoke '));
+ t.after(()=>fs.rm(dir,{recursive:true,force:true}));
+ const {buildConnector}=await import('./build-connector.mjs');
+ const zip=await buildConnector({platform:'darwin',arch:process.arch,output:path.join(dir,'Release Files')});
+ const unpack=path.join(dir,'Extracted Files');await fs.mkdir(unpack);
+ await run('/usr/bin/ditto',['-x','-k',zip,unpack]);
+ const folder=path.join(unpack,(await fs.readdir(unpack))[0]);
+ const node=path.join(folder,'runtime','node');
+ assert.equal((await run(node,['--version'])).stdout.trim(),'v24.19.0');
+ const result=await run(node,[path.join(folder,'app','connector','cli.mjs'),'init','--data-dir',path.join(dir,'User Data')]);
+ assert.equal(JSON.parse(result.stdout).running,false);
+ const manifest=JSON.parse(await fs.readFile(path.join(folder,'build-info.json'),'utf8'));
+ assert.ok(manifest.files.includes('Install.command'));
+ assert.ok(manifest.files.includes('THIRD_PARTY_NOTICES.md'));
+ assert.ok(manifest.files.includes('licenses/node/LICENSE'));
+ assert.ok(!manifest.files.some(f=>/\.test\.|fixtures\/|app\/node_modules\/postject|work\//.test(f)));
+});

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CodexPocket · 连接手机</title><link rel="stylesheet" href="/assets/style.css"></head>
+<body><main>
+<header><span class="brand">CODEX POCKET</span><span id="status" class="status">正在连接…</span></header>
+<h1>把工作接到手机上。</h1><p class="intro">连接这台电脑上的 Codex，继续你的项目和会话。</p>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+<div class="layout"><section class="panel">
+<div class="heading"><h2>这台电脑</h2><button id="toggle" class="quiet" disabled>正在检查</button></div>
+<label>显示名称<input id="name" maxlength="100" autocomplete="off"></label>
+<p id="codex" class="muted">正在识别 Codex…</p>
+<hr><h2>选择连接方式</h2>
+<div class="tabs" role="group" aria-label="连接方式"><button id="tailtab" aria-pressed="true">Tailscale</button><button id="vpstab" aria-pressed="false">自有 VPS</button></div>
+<div id="tailpane"><p>电脑和手机登录同一个 Tailscale 网络，无需购买 VPS。</p><button id="tailscale" class="primary">启用 Tailscale 连接</button></div>
+<div id="vpspane" hidden><p>使用你自己的 HTTPS 转发入口。</p><label>连接地址<input id="endpoint" placeholder="wss://codex.example.com/ws" inputmode="url" autocomplete="off"></label><button id="save" class="primary">保存连接地址</button></div>
+<details><summary>连接状态</summary><pre id="details"></pre></details>
+</section><section class="panel pairing"><span class="step">手机端</span><h2>扫码，继续工作。</h2><p>在 CodexPocket 中选择“扫描二维码”。</p><div id="qr" class="qr"><p>先启动连接端并设置连接方式。</p></div><p id="pairedEndpoint" class="endpoint"></p><button id="copy" class="quiet" disabled>复制配对链接</button><p class="muted small">二维码包含这台电脑的连接凭据，请在自己的手机上扫描。</p></section></div>
+<footer>会话保存在你的电脑上。关闭此页面不影响后台连接。</footer>
+</main><script src="/assets/qrcode.js"></script><script src="/assets/app.js"></script></body></html>

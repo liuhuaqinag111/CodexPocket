@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CodexPocket bridge</title>
+  <style>body{font:16px system-ui,sans-serif;max-width:42rem;margin:4rem auto;padding:0 1rem}code{font-family:ui-monospace,monospace}</style>
+</head>
+<body>
+  <h1>CodexPocket bridge</h1>
+  <p id="status">Checking bridge status...</p>
+  <script>
+    fetch('/status').then(r => r.json()).then(value => {
+      document.getElementById('status').textContent = value.upstreamReady ? 'Connected to app-server.' : 'Waiting for app-server.';
+    }).catch(() => { document.getElementById('status').textContent = 'Bridge status unavailable.'; });
+  </script>
+</body>
+</html>

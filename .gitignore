@@ -1,0 +1,28 @@
+# 构建 / 打包产物：几 GB，不进仓库
+node_modules/
+work/
+dist/
+outputs/
+*.ipa
+DerivedData/
+__pycache__/
+*.pyc
+*.log
+.env
+.env.*
+.codex/
+
+# Xcode 用户态
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# 手改前的备份
+*.bak
+*.bak2
+*.bak.*
+
+# 系统
+.DS_Store
+
+*.xcresult/

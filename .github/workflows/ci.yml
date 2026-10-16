@@ -1,0 +1,63 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    name: Connector and packaging (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Isolated Node and installer tests
+        run: npm test
+        env:
+          RUN_REAL_CODEX_TESTS: '0'
+      - name: Public export boundary tests
+        run: python scripts/export-public.test.py
+
+  ios:
+    name: iOS unit tests (simulator only)
+    runs-on: macos-15
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select an available iPhone simulator
+        shell: bash
+        run: |
+          xcrun simctl list devices available -j > "$RUNNER_TEMP/simulators.json"
+          python3 -c 'import json,os; d=json.load(open(os.environ["RUNNER_TEMP"]+"/simulators.json")); print("SIMULATOR_UDID="+next(x["udid"] for k,v in d["devices"].items() if ".iOS-" in k for x in v if x["name"].startswith("iPhone")))' >> "$GITHUB_ENV"
+      - name: Run isolated unit target
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/codexpocket-codex"
+          CODEX_HOME="$RUNNER_TEMP/codexpocket-codex" \
+          xcodebuild test -project CodexPocket.xcodeproj -scheme CodexPocket \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/CodexPocketDerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/CodexPocketUnitTests.xcresult" \
+            -only-testing:CodexPocketTests \
+            -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ios-unit-test-results
+          path: ${{ runner.temp }}/CodexPocketUnitTests.xcresult
+          retention-days: 7

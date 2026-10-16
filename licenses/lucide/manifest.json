@@ -1,0 +1,720 @@
+{
+  "package": "lucide-static",
+  "version": "1.56.0",
+  "source": "https://registry.npmjs.org/lucide-static/-/lucide-static-1.56.0.tgz",
+  "license": "ISC and Feather MIT (complete text in LICENSE)",
+  "converter": "svglib 1.6.0 + reportlab",
+  "format": "24x24 vector PDF, 2 unit round strokes, template tint",
+  "icons": [
+    {
+      "name": "activity",
+      "svg_sha256": "949361c4b5fa4b0d14583d498a80e4b7c0229b45dbbad3c227ebd846e604fed3",
+      "bytes": 1575
+    },
+    {
+      "name": "archive",
+      "svg_sha256": "016b6b3be2316028501454597046f2496f6455dc9c4faacda2e14be369f24cb0",
+      "bytes": 1535
+    },
+    {
+      "name": "archive-restore",
+      "svg_sha256": "6be3e1b1f08201fc31766ab5cc32efcdbbcd88cfbcd62e7120c6de50265f3285",
+      "bytes": 1553
+    },
+    {
+      "name": "arrow-down",
+      "svg_sha256": "e28cfa34018fc36d489376e5b62d382c8dff116273351f037abdd999e5704359",
+      "bytes": 1413
+    },
+    {
+      "name": "arrow-down-to-line",
+      "svg_sha256": "b093ccf09bf5a66f3018ab4c5ce5acec56365f337fa4cb3d44242db0518c35f0",
+      "bytes": 1429
+    },
+    {
+      "name": "arrow-left",
+      "svg_sha256": "14a95608b147b89fd161324150d607f524d0cf45882f0d19c883a986ae9cd782",
+      "bytes": 1414
+    },
+    {
+      "name": "arrow-right",
+      "svg_sha256": "625f7498faef04b5845f37fee65c8720c44be127489a6e1daf715462c0a32192",
+      "bytes": 1413
+    },
+    {
+      "name": "arrow-up",
+      "svg_sha256": "00257aa92d7bb9ab5f4ecbc3e68f685f5756b17c951649ee04d4d71f06c6800d",
+      "bytes": 1415
+    },
+    {
+      "name": "arrow-up-right",
+      "svg_sha256": "37e1fe1946571e004af1187efd4fbd3f2add888861785a9e5c43745f95833c28",
+      "bytes": 1409
+    },
+    {
+      "name": "audio-lines",
+      "svg_sha256": "b6c62cf5b656938315ef77d4812966165d00369d040d5ed374fbf8d78bd0538a",
+      "bytes": 1452
+    },
+    {
+      "name": "bell",
+      "svg_sha256": "355b3d0902d14d943f9f7301cd9e3ca49f197a2bffd288a6d22bdc767d8f8773",
+      "bytes": 1655
+    },
+    {
+      "name": "bolt",
+      "svg_sha256": "3af7da7f815ad9395bd15a34cbfaad0fcc1954d4064ce480a6b4eaa3d4307931",
+      "bytes": 1615
+    },
+    {
+      "name": "braces",
+      "svg_sha256": "b1518a63b6020c2c569c4611b27f588d5039d7322d652270c6df450a064039aa",
+      "bytes": 1550
+    },
+    {
+      "name": "brain",
+      "svg_sha256": "c0238af7092d4d44233a309849740e154ed62c565a8662ef1502f94022eb78f9",
+      "bytes": 2074
+    },
+    {
+      "name": "camera",
+      "svg_sha256": "2756af9c5183f6d829e2c78b3ccbd1fde453ccf46dbacb60c5bc8f44fa4782a7",
+      "bytes": 1684
+    },
+    {
+      "name": "chart-no-axes-column",
+      "svg_sha256": "49279ae81a47df990f5d99eeb9a68a6fdc387659c8b043973e787b01d294f153",
+      "bytes": 1420
+    },
+    {
+      "name": "chart-no-axes-combined",
+      "svg_sha256": "521ade0bc5f89bae396b2ac0f68fd6209c4d29da7325bc2f56c1b4d96d02b3f4",
+      "bytes": 1554
+    },
+    {
+      "name": "check",
+      "svg_sha256": "57292c58a8b9492bcb33de362a210229c85d643ea80c3444e2d77cb74ae42cc6",
+      "bytes": 1405
+    },
+    {
+      "name": "chevron-down",
+      "svg_sha256": "e1a65020d5e7e530f01ea75dca301a4ddd4ed76af85140820c7a9ecff76f5337",
+      "bytes": 1403
+    },
+    {
+      "name": "chevron-left",
+      "svg_sha256": "6d5df77840771b2cd2286e7f3e40656630c26c88c4069f7e8d9a354431987f9a",
+      "bytes": 1403
+    },
+    {
+      "name": "chevron-right",
+      "svg_sha256": "6b7b76b5b5b35cbd0fdd0fec1ed41afbf7690d455949829cae463c673f2c58ec",
+      "bytes": 1403
+    },
+    {
+      "name": "chevron-up",
+      "svg_sha256": "6a78245be44615d05fbd7fd341915e0336a58519601672c6a7ba84bc68d0f087",
+      "bytes": 1403
+    },
+    {
+      "name": "circle",
+      "svg_sha256": "76ad95714e8cc0de5d669afbc6af0472b22de214ae469b38445ce1044307c307",
+      "bytes": 1435
+    },
+    {
+      "name": "circle-alert",
+      "svg_sha256": "1e241084c8d38bf9859b8b0b3985c783fb9cca4910d0a7cffc2d0cbad5a321d2",
+      "bytes": 1463
+    },
+    {
+      "name": "circle-arrow-down",
+      "svg_sha256": "0aed7e13a4c45e70af4f92069fa4fefc16332257177c9ec6d76d92dd12ae0ec0",
+      "bytes": 1472
+    },
+    {
+      "name": "circle-check",
+      "svg_sha256": "28997b75cf80f2741f524afdb9c40dee74087bca28e1b5539b2af522c2a1b83a",
+      "bytes": 1468
+    },
+    {
+      "name": "circle-dashed",
+      "svg_sha256": "e3deefe33147d5a031ab5e5d36a314d6493237c735f5e7c96a0bc9d8809d387d",
+      "bytes": 1634
+    },
+    {
+      "name": "circle-dot",
+      "svg_sha256": "2508175b49d9da8284dded09e9914f3ac718d0ff3ea4f756b34605f5888fad5c",
+      "bytes": 1488
+    },
+    {
+      "name": "circle-help",
+      "svg_sha256": "0021145dcb31d0137ff4da26b1a43d1c8fbaa4683f5d5fdb82b16b8b5eb5805d",
+      "bytes": 1557
+    },
+    {
+      "name": "circle-pause",
+      "svg_sha256": "573b15a8af3138bb6eb12b466dfd5e77e8b9f623ebe32d466a334cca0a1c112c",
+      "bytes": 1462
+    },
+    {
+      "name": "circle-stop",
+      "svg_sha256": "db69dec688f973f627b44f88a6776907eeb0ed70ef43c199574bf4f8e696b933",
+      "bytes": 1514
+    },
+    {
+      "name": "circle-user-round",
+      "svg_sha256": "aa0148b15d253ccffadef5424ef2f63ac83c3d46862b0c02a41867fbcfb500aa",
+      "bytes": 1589
+    },
+    {
+      "name": "circle-x",
+      "svg_sha256": "bae9bd1dfc0ca77e8554affb22f9c65c6183f7ce2e94e80e07d26cffa0fd2819",
+      "bytes": 1469
+    },
+    {
+      "name": "clipboard",
+      "svg_sha256": "f15699c521a79de39785254d2e2ed90d2295bc3373077352f4acd761f44a65c0",
+      "bytes": 1543
+    },
+    {
+      "name": "clipboard-paste",
+      "svg_sha256": "3aa3c48c5219f7ce70c803c62cacdc9fa610659a4c7f5942a34db08dcf215663",
+      "bytes": 1605
+    },
+    {
+      "name": "clock",
+      "svg_sha256": "aaf42725f6a29b0e29a98f49ff26b191089098db53e43285ceacefe0f42f2e6c",
+      "bytes": 1464
+    },
+    {
+      "name": "clock-arrow-up",
+      "svg_sha256": "b3c3d5ab96f4d0d7c2af67ccb1cbf29618d9e23458b311351065d5363b949f0c",
+      "bytes": 1603
+    },
+    {
+      "name": "code",
+      "svg_sha256": "51e978f049e9dc477ee3385c12ab18616d32d91156b09945b87cd8d9a0eea84a",
+      "bytes": 1423
+    },
+    {
+      "name": "code-xml",
+      "svg_sha256": "8a2160e1057ce94eb8ccb028450750cafd9e6cc77a2c2c23673a868048378210",
+      "bytes": 1437
+    },
+    {
+      "name": "copy",
+      "svg_sha256": "73aea1b61d3f1b6c6fe50a6d58f59547569a6e18ab57e9d41d373f553143e36b",
+      "bytes": 1512
+    },
+    {
+      "name": "corner-down-right",
+      "svg_sha256": "33a28cb69dd4138f692a0c956da012c8b65e29e985df440943c2f63f4c96d1c6",
+      "bytes": 1442
+    },
+    {
+      "name": "database",
+      "svg_sha256": "d71fbb8bb1e30d585fa95e9a0e5e7def31ffc806d1a6299f0a0b3a0ecd36dc00",
+      "bytes": 1532
+    },
+    {
+      "name": "download",
+      "svg_sha256": "4c2ce502d76dd08191c78f99b49185709d157b393260aed7e32b158bad3de667",
+      "bytes": 1467
+    },
+    {
+      "name": "ellipsis",
+      "svg_sha256": "9a04f6467300735efc22903d1025ecb6846cfbfe71405f74057c10d1d1c0ec8f",
+      "bytes": 1537
+    },
+    {
+      "name": "external-link",
+      "svg_sha256": "815ed209176853c9f068a69550f4b7987188d4d6b7ecfa4356e6895bad9a382e",
+      "bytes": 1483
+    },
+    {
+      "name": "eye",
+      "svg_sha256": "786306090b8f611c4c22055f88ca6c852c6fbbdeab3947d4e8fe859ec7aee824",
+      "bytes": 1592
+    },
+    {
+      "name": "file",
+      "svg_sha256": "b20d822c70a32fe1803175ba7ba4bfe71bba772abd47d11e03f50f3b3d3b4545",
+      "bytes": 1567
+    },
+    {
+      "name": "file-code",
+      "svg_sha256": "856d15876111bf9dd9cf5b440a41bdf9800a3cfe63917da0c671b2d277f7881e",
+      "bytes": 1594
+    },
+    {
+      "name": "file-code-2",
+      "svg_sha256": "41e4ce6772fb36ef365182f3440778136f56fd7b975ed77c71b9362f040d233d",
+      "bytes": 1585
+    },
+    {
+      "name": "file-image",
+      "svg_sha256": "a9e20dd4db21ea3556f8436a942e65a8a92aeb5814d9bb061ebc368e8c0d53d5",
+      "bytes": 1675
+    },
+    {
+      "name": "file-json",
+      "svg_sha256": "701a45658494c1a3c7d3eff3bd6c2350dbc623c893f7537bb3c8c84c3f082c82",
+      "bytes": 1683
+    },
+    {
+      "name": "file-json-2",
+      "svg_sha256": "8d3af92696252cee39ac32748720e510f2ddea54e4a631828c5f9ba9bc1b3d5d",
+      "bytes": 1668
+    },
+    {
+      "name": "file-plus",
+      "svg_sha256": "3da23d8da2548d7bbebc46af1bfeacab429ad756e84d9bd38a89e0fa424b95a7",
+      "bytes": 1587
+    },
+    {
+      "name": "file-search",
+      "svg_sha256": "10888bc521da9c11095588550678ebaf701d26539c0c707f7a292706924d99c6",
+      "bytes": 1650
+    },
+    {
+      "name": "file-text",
+      "svg_sha256": "cecc5df91e0e2b92e0988b72be4d24a33fa48613624677c4bcdeed2fdb285470",
+      "bytes": 1594
+    },
+    {
+      "name": "folder",
+      "svg_sha256": "15a8cbe890c0e7292cee6ee8ff6f7c1b9408f134b4d49dd7485945daf4419a5c",
+      "bytes": 1542
+    },
+    {
+      "name": "folder-input",
+      "svg_sha256": "862873240384d5f596c28bd6aac4cc9b5f56d249da5c572c2bb3b9641d944255",
+      "bytes": 1575
+    },
+    {
+      "name": "folder-open",
+      "svg_sha256": "f32680859b38720e832b0657fca192a34b0cfcc8ad07609ebf55269cac54ca44",
+      "bytes": 1665
+    },
+    {
+      "name": "folder-plus",
+      "svg_sha256": "9d3ac03bfc6283202967957f9c5c8e13c17f03b60066b02aa7f2e7ee81ea4256",
+      "bytes": 1572
+    },
+    {
+      "name": "folder-search",
+      "svg_sha256": "377234855a77e4af365f847ec2e3f3fcb87a9920caf26848a1c283d2d365cf1c",
+      "bytes": 1613
+    },
+    {
+      "name": "git-branch",
+      "svg_sha256": "63903482fd5f05d1785d7db93dde8780c4218c390c1cb65b10963b5625875805",
+      "bytes": 1534
+    },
+    {
+      "name": "git-fork",
+      "svg_sha256": "c508f207241868022eac811ede5b6d04267a19f1bd217b4f3ad685e22bc5d8a9",
+      "bytes": 1610
+    },
+    {
+      "name": "globe",
+      "svg_sha256": "05a65d3fa97258b0a945ac2e214e2df6a3cc284bb15c2e61bd25c0ef2d497314",
+      "bytes": 1493
+    },
+    {
+      "name": "hard-drive",
+      "svg_sha256": "87f36358bf6984e499e4550b84cc7460b30fef3d3c8cda0c7a9abebd5fa64d09",
+      "bytes": 1618
+    },
+    {
+      "name": "hash",
+      "svg_sha256": "8338ed72c6bd8aab90ce27c897bbe5b611e34d44c89393d32aff6fe1bc6dc4c7",
+      "bytes": 1424
+    },
+    {
+      "name": "history",
+      "svg_sha256": "853606d002c506f1ed5376f999cee4fd09a05ca79dfb6fb800215e079d867c21",
+      "bytes": 1508
+    },
+    {
+      "name": "house",
+      "svg_sha256": "c44edb40c49ffcb78893beaa6f0604c5be994e94735c15726fcd5f3a44e95cc8",
+      "bytes": 1592
+    },
+    {
+      "name": "image",
+      "svg_sha256": "f4ec13bc615eb824ccc13902b6872168cd1a1a7d95851b7f0acfabd24e254903",
+      "bytes": 1565
+    },
+    {
+      "name": "inbox",
+      "svg_sha256": "8ca29d4a5fd9795913315eff313e3ea455099fcb8340cd12501e4b664a54faff",
+      "bytes": 1542
+    },
+    {
+      "name": "info",
+      "svg_sha256": "433c90a97af019145f99e780131b0910058591d706687db4557e2b5e5bb265a9",
+      "bytes": 1469
+    },
+    {
+      "name": "keyboard",
+      "svg_sha256": "df25cd101c8039ce2fc35b3ccb100fc4af03860bf85a001e67ce6fc151c1bce0",
+      "bytes": 1544
+    },
+    {
+      "name": "layers",
+      "svg_sha256": "f0ad59e2c53c00dc5a3c9264434c89788fa6358324a18a2686ca2129e269c90f",
+      "bytes": 1719
+    },
+    {
+      "name": "layers-2",
+      "svg_sha256": "3df33a0d7c4089e033f54b0258c1c7c70c298248f80095f64965f1c3ff60ef26",
+      "bytes": 1657
+    },
+    {
+      "name": "link",
+      "svg_sha256": "abc812f7f3058a90a8ce299093f6897954783634aeb2b60766f5d0a91cfd775b",
+      "bytes": 1707
+    },
+    {
+      "name": "list-checks",
+      "svg_sha256": "0d08be21fa5e41701b16f12f905b7df2b2773655c00d29e2362200b1c9a02a10",
+      "bytes": 1442
+    },
+    {
+      "name": "list-filter",
+      "svg_sha256": "179f859929c276d0b1f478b9aeb4e7ea97770e28b0e2dacb6153066c7edc1269",
+      "bytes": 1425
+    },
+    {
+      "name": "loader-circle",
+      "svg_sha256": "f3f57fc5a2aba500985298de302565941fad13c0ac1b0c8b6533b9e753537094",
+      "bytes": 1537
+    },
+    {
+      "name": "lock",
+      "svg_sha256": "a4dbdfef516fa17a2987e8ad94ef27ab5f0cfa5ad48d02153aa72d88df457ac5",
+      "bytes": 1525
+    },
+    {
+      "name": "maximize-2",
+      "svg_sha256": "e272cbd28fea927ae6b8833b1f68de0d7dfdd7358a71ad8d4587a4b6c0670eaf",
+      "bytes": 1442
+    },
+    {
+      "name": "menu",
+      "svg_sha256": "11215932ba419a12659cc5419963677faf459fed598c3a5347c2e5e6b07cce84",
+      "bytes": 1419
+    },
+    {
+      "name": "message-circle",
+      "svg_sha256": "d069c52e3ffcdce3b8a7cb921df618dcb2763788cd3a92e4822f5369b499d7f4",
+      "bytes": 1683
+    },
+    {
+      "name": "message-square",
+      "svg_sha256": "a278a41c0d6fa49168e07e6da97193536ca262f01120ae679e45db4fc3aea179",
+      "bytes": 1565
+    },
+    {
+      "name": "message-square-quote",
+      "svg_sha256": "5d58098e44ffbedc11bf3ef5d79bf6669061801ff9ec76dda73a200ad493ee9b",
+      "bytes": 1627
+    },
+    {
+      "name": "messages-square",
+      "svg_sha256": "48ab201611bca5d45c85915bce0ff249a7e0df08fc03f59c3c611e949b72f7d9",
+      "bytes": 1699
+    },
+    {
+      "name": "mic",
+      "svg_sha256": "83eb7723224b5366e5e372324f5163db2eea8e262282eb47e51ff15c36ad5775",
+      "bytes": 1525
+    },
+    {
+      "name": "monitor",
+      "svg_sha256": "7a9d02a940d455d29f4a6395097182a9f7a33a43dc21e068913deaf879e16a34",
+      "bytes": 1485
+    },
+    {
+      "name": "moon",
+      "svg_sha256": "86cae55ecddc21e0e2606865f813d0283ebe88696ed0211338c836928b597690",
+      "bytes": 1617
+    },
+    {
+      "name": "network",
+      "svg_sha256": "8da96d7777992294b3fe383f0c498e78d91ec8dca30ce02ea157b60e51d41e83",
+      "bytes": 1645
+    },
+    {
+      "name": "panel-left",
+      "svg_sha256": "4eac8df1e7a1792f8294b2bb762e7cdbbfd34f69e1d83db02bbd359c95ba0b3d",
+      "bytes": 1473
+    },
+    {
+      "name": "panels-top-left",
+      "svg_sha256": "070ee954b4ef84708f3b515ecfc9e758fc84ce4ba55e10b6f8b66ca51a3c779c",
+      "bytes": 1487
+    },
+    {
+      "name": "pause",
+      "svg_sha256": "e27121d037fbb0e27fddfc36068787d3b2a5339830668d00ababfb20e9eefb9b",
+      "bytes": 1518
+    },
+    {
+      "name": "pencil",
+      "svg_sha256": "f37ca69baecc97aa47bc8846690a914bd0d70ee3ba4ec0876b3c99b4587a754b",
+      "bytes": 1640
+    },
+    {
+      "name": "phone",
+      "svg_sha256": "3620f0e2b8ee9933f89196785f9b64dd8bf21ebc35893782e2702d546ca671ed",
+      "bytes": 1639
+    },
+    {
+      "name": "phone-off",
+      "svg_sha256": "68c46240814fca05167ca032b109cf918e96db20c73a2952124312e8d1ff15e2",
+      "bytes": 1747
+    },
+    {
+      "name": "play",
+      "svg_sha256": "2c089240c5ac071d682bf4dbad7f55a221badc2a75173374b7f3b20003ec2898",
+      "bytes": 1590
+    },
+    {
+      "name": "plug-zap",
+      "svg_sha256": "8ab546cc22b6edd2db3d35a94b7a030850bfde0622d04d686b38b22cb0bb4ceb",
+      "bytes": 1578
+    },
+    {
+      "name": "plus",
+      "svg_sha256": "9c80c22c24c8e669b894e2e0ab53b752059d9c22cd4a4bc42e77c1d75a4b7cd9",
+      "bytes": 1413
+    },
+    {
+      "name": "puzzle",
+      "svg_sha256": "70cf9d97ac1ad3e37ad19d7b426bb8f772498b9207ab433d56ff5325a6785bba",
+      "bytes": 2341
+    },
+    {
+      "name": "refresh-cw",
+      "svg_sha256": "ba5fd56c6d0acd008c2abd44ff06e590db41e6d1850a44806fbd07fe39a66d26",
+      "bytes": 1535
+    },
+    {
+      "name": "rotate-cw",
+      "svg_sha256": "b281c08694aa24fe893356fe29e4a17fb4e90218ea22608afc32f4bf6b8229e4",
+      "bytes": 1473
+    },
+    {
+      "name": "search",
+      "svg_sha256": "a7b33593e2a79eebdbf450b9914a119f7c988900ed0562c4e9677b33afc06c97",
+      "bytes": 1463
+    },
+    {
+      "name": "send",
+      "svg_sha256": "2b611ab549696ecbe89cb1cebc8ed827c7e08cd8c501fa3af77a0448f384b61d",
+      "bytes": 1674
+    },
+    {
+      "name": "server",
+      "svg_sha256": "aa9b9791a4785fa369d9e9963c9083c5581317b2262f8a86db708d28cecf0be1",
+      "bytes": 1545
+    },
+    {
+      "name": "settings",
+      "svg_sha256": "c696b24e4f326249b9326e30c74d6c1fd166604aecbbe32ed6b4acf460c56de6",
+      "bytes": 2093
+    },
+    {
+      "name": "settings-2",
+      "svg_sha256": "01f21c16a93010cb814b4bd886694657a6b6de611d4deebb53f057becf9b7f0c",
+      "bytes": 1517
+    },
+    {
+      "name": "shield-check",
+      "svg_sha256": "da999f81bb124d1940b89bc5e66c72e10d200ef61ff71ce64fe28f1773780b4b",
+      "bytes": 1567
+    },
+    {
+      "name": "shrink",
+      "svg_sha256": "a7bb5afb71a2cb7c6444d68149dd805c98c2b6a397111816801c984d7f005790",
+      "bytes": 1475
+    },
+    {
+      "name": "sliders-horizontal",
+      "svg_sha256": "d6b6e637559c6ea10f865b3ee3c428e04238c3ddf46d65dff42f095e156ba24b",
+      "bytes": 1477
+    },
+    {
+      "name": "smartphone",
+      "svg_sha256": "5d2f817082b298dfc12ab1d19a7a63c5d0c8b1e4cea0ca99158db6866b52c078",
+      "bytes": 1482
+    },
+    {
+      "name": "sparkles",
+      "svg_sha256": "62c67c76cde2c6ef42b76826e4e4d2147eae1447d58dd61fb61cee1aa015036c",
+      "bytes": 1760
+    },
+    {
+      "name": "square",
+      "svg_sha256": "a207ddecd736caa6129f1ff34232b883d535c29997de4184256317782b7256e1",
+      "bytes": 1455
+    },
+    {
+      "name": "square-pen",
+      "svg_sha256": "59ff8598667e3995dbf71f61e6cb23f1f491f080870acf64ef9d39dcd3dd71f8",
+      "bytes": 1667
+    },
+    {
+      "name": "sun",
+      "svg_sha256": "de0c59d1daaa667af7e263f8f296bfbb58139bd4d65faa133d26575560d5558d",
+      "bytes": 1543
+    },
+    {
+      "name": "terminal",
+      "svg_sha256": "1085ecccfd91757e7ad6c55d00389f04d1dba86bfcadbca06a59cd8d8c31e22b",
+      "bytes": 1419
+    },
+    {
+      "name": "trash",
+      "svg_sha256": "5f02d700917049fa0cfc64e1cde92d56977e0185c6b3b35ef05752f9c9d2b03b",
+      "bytes": 1517
+    },
+    {
+      "name": "trash-2",
+      "svg_sha256": "5853925929bad2bbb9b8ed8dc3a519fdc48cea03ee9c468a406ca54902ac8de8",
+      "bytes": 1517
+    },
+    {
+      "name": "triangle-alert",
+      "svg_sha256": "b55a7620d9de681aaabc49e77ec5d76f1f81bbde72b157c0adda33404debe986",
+      "bytes": 1617
+    },
+    {
+      "name": "undo-2",
+      "svg_sha256": "00924945b37333f196188b8d2331888ee023f1a9fefcb81c50055dfd89902099",
+      "bytes": 1455
+    },
+    {
+      "name": "unplug",
+      "svg_sha256": "006037732baddcefaf392e23c52f2659d23ff05965becd4b03eafebaa8b71409",
+      "bytes": 1649
+    },
+    {
+      "name": "upload",
+      "svg_sha256": "17b0c5d4177d9837e4c5eff7ee5a13c543b9d9887e196767e79341cb181b9805",
+      "bytes": 1465
+    },
+    {
+      "name": "user",
+      "svg_sha256": "3b3cc907994e90996fb992f96a0487f50a5c030c36367b2d69535ff23a869859",
+      "bytes": 1503
+    },
+    {
+      "name": "user-round",
+      "svg_sha256": "34505bff45dd4ba1965ed92642a06cde85c47de8d6cd82b90ae810eac62d5bc2",
+      "bytes": 1487
+    },
+    {
+      "name": "users",
+      "svg_sha256": "a7284da08589c163ccbd1c643cbf37627031c006389c953ca0a6d6d8e258b59b",
+      "bytes": 1608
+    },
+    {
+      "name": "volume-2",
+      "svg_sha256": "269579bfe34b8a69e44ae69ce6c4b4692d6bd9f2ed981e15b8424c7745301b33",
+      "bytes": 1739
+    },
+    {
+      "name": "wifi",
+      "svg_sha256": "107d4d80be098b120dd6b0901ac2c14796673b94e085b60e59e07a29337f51a4",
+      "bytes": 1519
+    },
+    {
+      "name": "wifi-off",
+      "svg_sha256": "dd6dc12eaa43ff1c90c58f84a19e024e6137dc3023b4e75606a3d1ec3df9421a",
+      "bytes": 1613
+    },
+    {
+      "name": "wrench",
+      "svg_sha256": "bddc641b2c8b17a7f0781352e6b0a0f7bebb52dc2e967a545ff29803158495f1",
+      "bytes": 1727
+    },
+    {
+      "name": "x",
+      "svg_sha256": "215604458643128c2f4e43e4798959d059bf38d738c5c39c0899470bb6b9a2e4",
+      "bytes": 1409
+    },
+    {
+      "name": "zap",
+      "svg_sha256": "32d47c3fada743c4a239a7505bf6c59f5d8a80793c08949a289ab49e3f8b310b",
+      "bytes": 1810
+    }
+  ],
+  "aliases": {
+    "archivebox": "archive",
+    "tray.and.arrow.up": "archive-restore",
+    "arrow.clockwise": "rotate-cw",
+    "arrow.triangle.2.circlepath": "refresh-cw",
+    "arrow.up": "arrow-up",
+    "arrow.down": "arrow-down",
+    "arrow.left": "arrow-left",
+    "arrow.right": "arrow-right",
+    "arrow.down.circle.fill": "circle-arrow-down",
+    "arrow.triangle.branch": "git-branch",
+    "arrow.turn.down.right": "corner-down-right",
+    "bolt.fill": "zap",
+    "bubble.left.and.bubble.right": "messages-square",
+    "quote.bubble": "message-square-quote",
+    "checkmark": "check",
+    "checkmark.circle.fill": "circle-check",
+    "checklist": "list-checks",
+    "chevron.right": "chevron-right",
+    "chevron.left": "chevron-left",
+    "chevron.down": "chevron-down",
+    "chevron.up": "chevron-up",
+    "chevron.left.forwardslash.chevron.right": "code-xml",
+    "circle.fill": "circle-dot",
+    "circle.inset.filled": "circle-dot",
+    "circle.dashed": "circle-dashed",
+    "clock.arrow.circlepath": "history",
+    "curlybraces": "braces",
+    "doc": "file",
+    "doc.text": "file-text",
+    "doc.badge.plus": "file-plus",
+    "doc.text.magnifyingglass": "file-search",
+    "doc.on.clipboard": "clipboard-paste",
+    "doc.on.doc": "copy",
+    "ellipsis": "ellipsis",
+    "exclamationmark.circle": "circle-alert",
+    "exclamationmark.triangle": "triangle-alert",
+    "folder.fill": "folder",
+    "folder.badge.questionmark": "folder-search",
+    "gearshape": "settings",
+    "house": "house",
+    "line.3.horizontal": "menu",
+    "line.3.horizontal.decrease.circle": "list-filter",
+    "line.3.horizontal.decrease.circle.fill": "list-filter",
+    "magnifyingglass": "search",
+    "person.2": "users",
+    "person.crop.circle": "circle-user-round",
+    "photo": "image",
+    "puzzlepiece.extension": "puzzle",
+    "slider.horizontal.3": "sliders-horizontal",
+    "speaker.wave.2": "volume-2",
+    "square.and.arrow.down": "download",
+    "square.and.pencil": "square-pen",
+    "square.stack.3d.up": "layers",
+    "stop.circle": "circle-stop",
+    "stop.fill": "square",
+    "waveform": "audio-lines",
+    "wifi.slash": "wifi-off",
+    "wifi.exclamationmark": "wifi-off",
+    "arrow.uturn.backward": "undo-2",
+    "chart.bar": "chart-no-axes-column",
+    "wrench.and.screwdriver": "wrench",
+    "xmark": "x",
+    "xmark.circle.fill": "circle-x"
+  }
+}
