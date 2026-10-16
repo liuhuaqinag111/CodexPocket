@@ -54,10 +54,13 @@ final class HandshakeGuardTests: XCTestCase {
         rpc.connect(url: URL(string: "wss://example.invalid/ws")!, token: token)
     }
 
-    private func ready(_ socket: TestSocket) {
+    private func ready(_ socket: TestSocket, on rpc: WebSocketTransport) {
+        let drained = expectation(description: "handshake response delivered")
         let id = socket.frames.first!.int("id")!
         socket.receiver?(.success(.string("{\"id\":\(id),\"result\":{}}")))
-        drainCallbacks()
+        // receive parses on incoming before enqueuing the response on main.
+        rpc.incoming.async { DispatchQueue.main.async { drained.fulfill() } }
+        wait(for: [drained], timeout: 1)
     }
 
     func testReplacingHandshakeIgnoresOldFailure() {
@@ -80,7 +83,7 @@ final class HandshakeGuardTests: XCTestCase {
         open(rpc)
         let old = session.sockets[0]
         open(rpc, token: "changed")
-        ready(old)
+        ready(old, on: rpc)
         XCTAssertEqual(rpc.state, .connecting)
         XCTAssertEqual(rpc.connects, 0)
     }
@@ -90,16 +93,21 @@ final class HandshakeGuardTests: XCTestCase {
         let rpc = WebSocketTransport(makeTask: session.webSocketTask)
         defer { rpc.disconnect() }
         open(rpc)
-        ready(session.sockets[0])
+        ready(session.sockets[0], on: rpc)
+        XCTAssertEqual(rpc.state, .ready)
+        let failed = expectation(description: "matching request failed")
         var completions = 0
         rpc.rpc("thread/list") { result in
-            if case .failure = result { completions += 1 }
+            if case .failure = result {
+                completions += 1
+                failed.fulfill()
+            }
         }
         let failedSend = session.sockets[0].sends.last!
         var otherFinished = false
         rpc.rpc("model/list") { _ in otherFinished = true }
         failedSend(URLError(.networkConnectionLost))
-        drainCallbacks()
+        wait(for: [failed], timeout: 1)
         XCTAssertEqual(completions, 1)
         XCTAssertFalse(otherFinished)
         XCTAssertEqual(rpc.state, .ready)
@@ -112,7 +120,7 @@ final class HandshakeGuardTests: XCTestCase {
         let rpc = WebSocketTransport(makeTask: session.webSocketTask)
         defer { rpc.disconnect() }
         open(rpc)
-        ready(session.sockets[0])
+        ready(session.sockets[0], on: rpc)
         let changed = expectation(description: "retry state")
         rpc.onState = { state in
             if case .reconnecting = state {
@@ -131,7 +139,7 @@ final class HandshakeGuardTests: XCTestCase {
         let rpc = WebSocketTransport(makeTask: session.webSocketTask)
         defer { rpc.disconnect() }
         open(rpc)
-        ready(session.sockets[0])
+        ready(session.sockets[0], on: rpc)
         rpc.probe()
         rpc.probe()
         XCTAssertEqual(session.sockets[0].frames.filter { $0.str("method") == "bridge/ping" }.count, 1)
