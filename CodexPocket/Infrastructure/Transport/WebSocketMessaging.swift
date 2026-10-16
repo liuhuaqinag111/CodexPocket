@@ -172,5 +172,5 @@ extension WebSocketTransport {
 
 /// 这一版 App 的标记：设置页可见，同时随心跳报到电脑端日志。
 enum Build {
-    static let stamp = "2026-10-17 v0.1.0 开源版，支持 Windows、macOS 与 CC Switch"
+    static let stamp = "2026-10-17 v0.1.1 开源版，支持 Windows、macOS 与 CC Switch"
 }
