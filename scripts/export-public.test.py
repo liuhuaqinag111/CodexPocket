@@ -67,7 +67,7 @@ class PublicExportTests(unittest.TestCase):
             self.write(name, 'public fixture')
         result = self.run_export()
         self.assertEqual(result.returncode, 0, result.stderr)
-        files = {str(p.relative_to(self.output)) for p in self.output.rglob('*') if p.is_file()}
+        files = {p.relative_to(self.output).as_posix() for p in self.output.rglob('*') if p.is_file()}
         self.assertIn('connector/cli.mjs', files)
         self.assertIn('docs/public/setup.md', files)
         self.assertIn('packaging/sea-config.json', files)
