@@ -48,6 +48,8 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/codexpocket-codex"
+          # WebKit bug 293831 affects iOS 18.5 simulators with older targets.
+          # Override only this test build; the shipping target remains iOS 16.4.
           CODEX_HOME="$RUNNER_TEMP/codexpocket-codex" \
           xcodebuild test -project CodexPocket.xcodeproj -scheme CodexPocket \
             -destination "platform=iOS Simulator,id=$SIMULATOR_UDID" \
@@ -55,7 +57,7 @@ jobs:
             -resultBundlePath "$RUNNER_TEMP/CodexPocketUnitTests.xcresult" \
             -only-testing:CodexPocketTests \
             -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO \
-            ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES=YES
+            IPHONEOS_DEPLOYMENT_TARGET=18.4
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
