@@ -15,8 +15,8 @@ function titleFrom(preview) {
  return s.length>18?s.slice(0,18)+'…':s;
 }
 export class WriterRouter {
- constructor({createWorker,onNotification=()=>{},onRequest=()=>{},onRequestClosed=()=>{},log=()=>{},delay=1500}) {
-  Object.assign(this,{createWorker,onNotification,onRequest,onRequestClosed,log,delay});
+ constructor({createWorker,desktop,onNotification=()=>{},onRequest=()=>{},onRequestClosed=()=>{},log=()=>{},delay=1500}) {
+  Object.assign(this,{createWorker,desktop,onNotification,onRequest,onRequestClosed,log,delay});
   this.entries=new Map();this.owners=new Map();this.statuses=new Map();
   this.approvals=new Map();this.seq=0;this.approvalSeq=-1000000;
  }
@@ -124,7 +124,15 @@ export class WriterRouter {
    if(id){e.threadID=e.threadID||id;this.owners.set(id,e);if(result.thread?.status)this.statuses.set(id,result.thread.status);}
    respond({id:message.id,result});
   } catch(error) {
-   // 空会话尚未落盘，但创建它的 worker 已持有它。只兼容不改配置的
+   if(this.desktop&&/(active writer|live local writer)/i.test(error.message)){
+    try{
+     const result=await this.desktop.forward(message);
+     if(result){respond({id:message.id,result});return true;}
+    }catch(failure){
+     respond({id:message.id,error:{code:-32091,message:failure.message}});return true;
+    }
+   }
+   // Empty threads can exist only in the creating worker until persisted.
    // resume；保留创建时的真实配置，不能把未知会话或配置失败伪装成成功。
    if(method==='thread/resume'&&isNoRollout(error)&&e.freshResult?.thread?.id===params.threadId
       &&e.threadID===params.threadId&&this.owners.get(params.threadId)===e
@@ -151,6 +159,10 @@ export class WriterRouter {
     if(entry)await this.release(entry);
     return {released:false,writerWorkers:entry&&!entry.dead?1:0,
      reason:/(active writer|live local writer)/i.test(reply.error.message)?'external-writer':'busy-or-unverified'};
+   }
+   if(reply?.result&&!this.owners.has(threadId)&&this.desktop){
+    const entry=this.entries.get(threadId);if(entry)await this.release(entry);
+    return {released:false,canSend:true,writerWorkers:0,reason:'desktop-connected'};
    }
   }
   const selected=threadId?[this.owners.get(threadId)||this.entries.get(threadId)].filter(Boolean)

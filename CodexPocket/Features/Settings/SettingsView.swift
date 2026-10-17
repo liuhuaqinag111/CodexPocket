@@ -60,12 +60,12 @@ struct SettingsView: View {
     /// 只回收手机桥接持有且确认空闲的写进程。
     @ViewBuilder
     private var lockRow: some View {
-        Button("释放当前会话占用") {
+        Button("恢复当前会话发送") {
             updateMsg = "正在释放…"
             Task { @MainActor in updateMsg = await store.releaseWriterLocks() }
         }
         .font(Palette.F.note).frame(minHeight: 44)
-        Text("释放手机持有的空闲会话。若由电脑 Codex 占用，会提示你关闭电脑上的该会话。")
+        Text("检查当前会话的占用。空闲时释放，电脑持有时连接到电脑继续发送。")
             .font(Palette.F.caption)
             .foregroundStyle(Palette.textFaint)
     }

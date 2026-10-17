@@ -2,6 +2,7 @@ import http from 'node:http';
 import { StdioWorker } from './stdio-worker.mjs';
 import { withProviderExecution } from './provider-execution.mjs';
 import { WriterRouter } from './writer-router.mjs';
+import { DesktopOwner } from './desktop-owner.mjs';
 import { loadProviderCatalog } from './provider-catalog.mjs';
 import { withAllProviders } from './list-params.mjs';
 import { withDesktopProjectless } from './desktop-projectless.mjs';
@@ -68,6 +69,8 @@ const writerBinary = process.env.CODEX_BIN || [
  '/Applications/Codex.app/Contents/Resources/codex'
 ].find(path => fs.existsSync(path));
 const writers = new WriterRouter({
+ desktop: new DesktopOwner({readThread:threadId=>requestSocket(up,'thread/read',
+  {threadId,includeTurns:false},{timeout:4000})}),
  delay: Number(process.env.WRITER_RELEASE_MS ?? 1500),
  createWorker: callbacks => new StdioWorker({binary:writerBinary,log,
    spawnProcess: withProviderExecution(), ...callbacks}),

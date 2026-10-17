@@ -16,6 +16,8 @@ final class ConnectionDiagnosticsTests: XCTestCase {
                        "会话由电脑 Codex 持有，请在电脑关闭该会话后重试")
         XCTAssertEqual(AppCoordinator.writerReleaseFeedback(["released": false, "reason": "not-owned"]),
                        "未确认会话锁已释放，请重新打开会话后重试")
+        XCTAssertEqual(AppCoordinator.writerReleaseFeedback(["released": false, "canSend": true, "reason": "desktop-connected"]),
+                       "已连接电脑会话，可以直接发送消息")
     }
 
     @MainActor

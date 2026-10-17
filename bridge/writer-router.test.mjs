@@ -211,6 +211,33 @@ test('manual release verifies an external writer and never reports success',asyn
  assert.equal(workers.length,1);assert.equal(workers[0].closed,true);
 });
 
+test('desktop ownership conflict forwards the original submission exactly once',async t=>{
+ const {router,workers}=fixture();t.after(()=>router.cancelTimers());const forwarded=[];
+ router.desktop={forward:async message=>{forwarded.push(message);return{turn:{id:'desktop-turn'}};}};
+ const create=router.createWorker;
+ router.createWorker=options=>{
+  const w=create(options);w.request=async()=>{throw Error('already has an active writer');};return w;
+ };
+ const message={id:1,method:'turn/start',params:{threadId:'t',clientUserMessageId:'stable'}};
+ let reply;await router.route(message,value=>{reply=value;});
+ assert.equal(reply.result.turn.id,'desktop-turn');assert.deepEqual(forwarded,[message]);
+});
+
+test('manual recovery distinguishes desktop connection from a released lock',async t=>{
+ const {router}=fixture();t.after(()=>router.cancelTimers());
+ router.desktop={forward:async()=>({thread:{id:'t'}})};
+ const create=router.createWorker;
+ router.createWorker=options=>{
+  const w=create(options),request=w.request.bind(w);
+  w.request=async(method,params)=>{
+   if(method==='thread/resume')throw Error('already has an active writer');
+   return request(method,params);
+  };return w;
+ };
+ assert.deepEqual(await router.releaseIdle({threadId:'t',force:true}),
+  {released:false,canSend:true,writerWorkers:0,reason:'desktop-connected'});
+});
+
 test('normal worker exit only retires its mapping without forcing any process',()=>{
  const {router,workers}=fixture();let forced=0;
  router.create('a');router.create('b');

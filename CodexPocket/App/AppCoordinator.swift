@@ -533,7 +533,7 @@ final class AppCoordinator: ObservableObject {
                   let result = try JSONSerialization.jsonObject(with: data) as? JSONDict else {
                 return "释放失败，请检查连接后重试"
             }
-            if result.bool("released") == true {
+            if result.bool("released") == true || result.bool("canSend") == true {
                 if let threadID { chat.desktopLockedThreads.remove(threadID); chat.objectWillChange.send() }
                 else { chat.clearAllWriterLocks() }
             }
@@ -549,6 +549,7 @@ final class AppCoordinator: ObservableObject {
             return "已释放空闲会话，连接保持正常"
         }
         switch result.str("reason") {
+        case "desktop-connected": return "已连接电脑会话，可以直接发送消息"
         case "external-writer": return "会话由电脑 Codex 持有，请在电脑关闭该会话后重试"
         case "not-owned": return "未确认会话锁已释放，请重新打开会话后重试"
         case "active-turn": return "仍有回复正在生成，结束后会自动释放"
