@@ -84,10 +84,11 @@ final class ConversationSyncSafetyTests: XCTestCase {
 
     func testStoppingWatchCancelsRemainingPrefetchChain() async {
         let rec = Recorder(), chat = make(rec)
+        let started = expectation(description: "first prefetch started")
+        rec.onSnapshot = { started.fulfill() }
         chat.prefetch(["one", "two", "three"])
-        for _ in 0..<100 where rec.snapshots.isEmpty {
-            try? await Task.sleep(nanoseconds: 5_000_000)
-        }
+        await fulfillment(of: [started], timeout: 5)
+        rec.onSnapshot = nil
         XCTAssertEqual(rec.snapshots.count, 1)
         chat.stopRemoteWatch()
         rec.snapshots.first?(.success([]))
@@ -102,11 +103,15 @@ final class ConversationSyncSafetyTests: XCTestCase {
         var calls: [(JSONDict, RepositoryResult)] = []
         var cached: (([Item]) -> Void)?
         var snapshots: [(Result<[Item], Error>) -> Void] = []
+        var onSnapshot: (() -> Void)?
         var syncCacheReads = 0
         func reconnect() {}
         func cachedItems(_ id: String) -> [Item] { syncCacheReads += 1; return [] }
         func cachedItems(_ id: String, done: @escaping ([Item]) -> Void) { cached = done }
-        func refreshSnapshot(_ id: String, limit: Int, done: @escaping (Result<[Item], Error>) -> Void) { snapshots.append(done) }
+        func refreshSnapshot(_ id: String, limit: Int, done: @escaping (Result<[Item], Error>) -> Void) {
+            snapshots.append(done)
+            onSnapshot?()
+        }
         func perform(_ operation: ConversationOperation, done: RepositoryResult?) {
             let (method, params) = ConversationRepository.request(operation)
             if method == "thread/turns/list", let done { calls.append((params, done)) }
