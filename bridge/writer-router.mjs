@@ -141,14 +141,40 @@ export class WriterRouter {
   } finally {e.busy--;this.schedule(e);}
   return true;
  }
- async releaseIdle({threadId}={}){
+ async releaseIdle({threadId,force=false}={}){
   const selected=threadId?[this.owners.get(threadId)||this.entries.get(threadId)].filter(Boolean)
    :[...this.entries.values()];
+  // force=true（手机端手动点释放）时，先验证 activeTurns 是否过期。
+  // 电脑端发起的回合 turn/completed 只发给发起连接，bridge 常驻连接收不到；
+  // 如果 Codex 崩溃或 writer 异常退出，activeTurns 永远不会被清空。
+  // 这里实际读 thread/read，服务端返回 idle/systemError 就强制清空。
+  if(force) {
+   await Promise.all(selected.map(e=>this.verifyStaleActiveTurns(e)));
+  }
   await Promise.all(selected.map(e=>this.release(e)));
   const remaining=selected.filter(e=>!e.dead);
   const active=remaining.some(e=>e.realtime||e.activeTurns.size);
   return {released:remaining.length===0,writerWorkers:remaining.length,
    reason:active?'active-turn':remaining.length?'busy-or-unverified':''};
+ }
+ // 验证 activeTurns 是否过期：实际读 thread/read，idle/systemError 就清空。
+ async verifyStaleActiveTurns(e){
+  if(!e.activeTurns.size||e.dead||e.busy||e.checking)return;
+  for(const tid of [...e.activeTurns.keys()]) {
+   try {
+    const r=await e.worker.request('thread/read',{threadId:tid,includeTurns:false});
+    const status=r?.thread?.status?.type;
+    if(['idle','systemError','completed','interrupted','failed'].includes(status)) {
+     e.activeTurns.delete(tid);
+     this.statuses.set(tid,r.thread.status);
+     this.log('[writer] force-cleared stale activeTurn',tid,'status=',status);
+    }
+   } catch(error) {
+    // worker 已死或读失败，activeTurns 无意义，清空。
+    e.activeTurns.delete(tid);
+    this.log('[writer] force-cleared activeTurn on read error',tid,error.message);
+   }
+  }
  }
  decorate(message) {
   const patch=thread=>{
