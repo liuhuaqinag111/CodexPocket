@@ -141,10 +141,22 @@ export class WriterRouter {
   } finally {e.busy--;this.schedule(e);}
   return true;
  }
- async releaseIdle({threadId}={}){
+ async releaseIdle({threadId,force=false}={}){
+  if(force&&threadId&&!this.owners.has(threadId)){
+   let reply;
+   await this.route({id:'release-probe',method:'thread/resume',
+    params:{threadId,excludeTurns:true}},value=>{reply=value;});
+   if(reply?.error){
+    const entry=this.entries.get(threadId);
+    if(entry)await this.release(entry);
+    return {released:false,writerWorkers:entry&&!entry.dead?1:0,
+     reason:/(active writer|live local writer)/i.test(reply.error.message)?'external-writer':'busy-or-unverified'};
+   }
+  }
   const selected=threadId?[this.owners.get(threadId)||this.entries.get(threadId)].filter(Boolean)
    :[...this.entries.values()];
-  await Promise.all(selected.map(e=>this.release(e)));
+  if(threadId&&!selected.length)return {released:false,writerWorkers:0,reason:'not-owned'};
+  await Promise.all(selected.map(e=>this.release(e,{verify:force})));
   const remaining=selected.filter(e=>!e.dead);
   const active=remaining.some(e=>e.realtime||e.activeTurns.size);
   return {released:remaining.length===0,writerWorkers:remaining.length,
@@ -157,8 +169,8 @@ export class WriterRouter {
   if(Array.isArray(message.result?.data))message.result.data.forEach(patch);
   patch(message.result?.thread);return message;
  }
- async release(e) {
-  if(e.dead||e.busy||e.realtime||e.activeTurns.size||e.checking||e.closing||e.worker.pendingCount)return;
+ async release(e,{verify=false}={}) {
+  if(e.dead||e.busy||e.realtime||(!verify&&e.activeTurns.size)||e.checking||e.closing||e.worker.pendingCount)return;
   const generation=e.generation;
   const valid=()=>!e.dead&&!e.busy&&e.generation===generation&&!e.worker.pendingCount;
   e.checking=true;
@@ -166,6 +178,7 @@ export class WriterRouter {
    await e.worker.ready;
    const loaded=await e.worker.request('thread/loaded/list',{});
    if(!valid()||!Array.isArray(loaded.data)||loaded.nextCursor)return;
+   if([...e.activeTurns.keys()].some(id=>!loaded.data.includes(id)))return;
    for(const id of loaded.data) {
     const result=await e.worker.request('thread/read',{threadId:id,includeTurns:false});
     if(!valid()||result.thread?.id!==id)return;
@@ -173,6 +186,7 @@ export class WriterRouter {
     this.statuses.set(id,result.thread.status);
     // turns/list may lag a live turn; a persisted completed tail cannot prove idle.
     if(!['idle','systemError'].includes(status))return;
+    if(verify)e.activeTurns.delete(id);
     // 会话标题。空会话既没 name 也没 preview，`thread/list` 根本不返回它，
     // 所以先落个占位名"新会话"；发过消息（有 preview）就换成首条消息。
     // 占位名不换掉，手机端 autoName 会因为 `named` 已是 true 而跳过，

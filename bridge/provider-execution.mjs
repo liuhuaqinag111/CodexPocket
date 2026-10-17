@@ -1,12 +1,12 @@
 import {spawn} from 'node:child_process';
 import path from 'node:path';
 import os from 'node:os';
-import {readActiveProvider} from './provider-catalog.mjs';
+import {readExecutionProvider} from './provider-catalog.mjs';
 
 // Resolve CC Switch at worker creation time. The global CODEX_HOME is left
 // untouched; only this child receives the selected provider override.
 export function withProviderExecution({spawnProcess=spawn,
- readProvider=()=>readActiveProvider(process.env.CC_SWITCH_DB
+ readProvider=()=>readExecutionProvider(process.env.CC_SWITCH_DB
   ||path.join(os.homedir(),'.cc-switch','cc-switch.db'))}={}) {
  return (binary,args,options={})=>{
   let provider;

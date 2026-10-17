@@ -12,6 +12,10 @@ final class ConnectionDiagnosticsTests: XCTestCase {
                        "已释放空闲会话，连接保持正常")
         XCTAssertEqual(AppCoordinator.writerReleaseFeedback(["released": false, "reason": "busy-or-unverified"]),
                        "当前状态还没确认，暂不释放；稍后再试")
+        XCTAssertEqual(AppCoordinator.writerReleaseFeedback(["released": false, "reason": "external-writer"]),
+                       "会话由电脑 Codex 持有，请在电脑关闭该会话后重试")
+        XCTAssertEqual(AppCoordinator.writerReleaseFeedback(["released": false, "reason": "not-owned"]),
+                       "未确认会话锁已释放，请重新打开会话后重试")
     }
 
     @MainActor

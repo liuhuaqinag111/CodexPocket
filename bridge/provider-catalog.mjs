@@ -67,6 +67,12 @@ function readProxyConfig(dbPath) {
   finally { try { db?.close(); } catch {} }
 }
 
+export function readExecutionProvider(dbPath) {
+  // Proxy mode must inherit the desktop config; is_current can lag hot switches.
+  if (readProxyConfig(dbPath)) return null;
+  return readActiveProvider(dbPath);
+}
+
 function readActiveProvider(dbPath, liveProviderId) {
   if (!dbPath || !fs.existsSync(dbPath)) return null;
   let db;
@@ -77,9 +83,6 @@ function readActiveProvider(dbPath, liveProviderId) {
       ? db.prepare(
           'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND id = ? LIMIT 1',
         ).get('codex', liveProviderId)
-        ?? db.prepare(
-          'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND is_current = 1 LIMIT 1',
-        ).get('codex')
       : db.prepare(
           'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND is_current = 1 LIMIT 1',
         ).get('codex');
@@ -93,7 +96,7 @@ function readActiveProvider(dbPath, liveProviderId) {
     const token = typeof auth.OPENAI_API_KEY === 'string' ? auth.OPENAI_API_KEY : '';
     const fingerprint = crypto.createHash('sha256').update(JSON.stringify({
       id: row.id, name: row.name, model: config.model, modelProvider: selected,
-      baseURL: config.baseURL, wireAPI: config.wireAPI, token,
+      baseURL: config.baseURL, wireAPI: config.wireAPI, token, catalogModels,
     })).digest('hex');
     return {
       id: String(row.id), name: String(row.name || row.id), fingerprint,
@@ -135,11 +138,13 @@ export async function loadProviderCatalog({
   // 1. 拿代理实时 provider id
   const proxyConf = readProxyConfig(dbPath);
   const liveId = proxyConf ? await fetchLiveProviderId(proxyConf.address, proxyConf.port, fetchImpl) : null;
+  if (proxyConf && !liveId) return {available:true,models:[],error:'暂时无法确认电脑当前分组，请重试'};
 
   // 2. 读 provider 行
   let provider;
   try { provider = readActiveProvider(dbPath, liveId); }
   catch { return {available:true,models:[],error:'暂时无法读取 CC Switch 当前分组，请重试'}; }
+  if (liveId && !provider) return {available:true,models:[],error:'电脑当前分组未找到，请重试'};
   if (!provider || !provider.baseURL) return { available: false, models: [], reason: 'cc-switch-unavailable' };
 
   const cached = cache.get(provider.fingerprint);

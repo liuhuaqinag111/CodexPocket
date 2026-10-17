@@ -64,6 +64,32 @@ test('releaseIdle reports active turns and does not claim release',async()=>{
  router.cancelTimers();
 });
 
+test('manual release rechecks stale live status before closing its worker',async t=>{
+ const {router,workers}=fixture();t.after(()=>router.cancelTimers());
+ await router.route({id:1,method:'thread/resume',params:{threadId:'t'}},()=>{});
+ workers[0].options.onNotification('turn/started',{threadId:'t',turn:{id:'old'}});
+ workers[0].status='idle';
+ assert.deepEqual(await router.releaseIdle({threadId:'t',force:true}),
+  {released:true,writerWorkers:0,reason:''});
+ assert.equal(workers[0].closed,true);
+});
+
+test('manual verification retains ownership on read failure or a concurrent new turn',async t=>{
+ const {router,workers}=fixture();t.after(()=>router.cancelTimers());
+ await router.route({id:1,method:'thread/resume',params:{threadId:'t'}},()=>{});
+ const w=workers[0],request=w.request.bind(w);
+ w.options.onNotification('turn/started',{threadId:'t',turn:{id:'old'}});
+ w.request=async method=>{if(method==='thread/read')throw Error('offline');return request(method);};
+ assert.equal((await router.releaseIdle({threadId:'t',force:true})).released,false);
+ assert.equal(w.closed,false);
+ w.request=async method=>{
+  if(method==='thread/read')w.options.onNotification('turn/started',{threadId:'t',turn:{id:'new'}});
+  return request(method);
+ };
+ assert.equal((await router.releaseIdle({threadId:'t',force:true})).released,false);
+ assert.equal(w.closed,false);assert.equal(router.entries.get('t').activeTurns.get('t'),'new');
+});
+
 test('active status never releases from a stale persisted completed turn',async()=>{
  const {router,workers}=fixture();
  await router.route({id:1,method:'thread/resume',params:{threadId:'t'}},()=>{});
@@ -166,8 +192,23 @@ test('releasing an unowned chat does not release other chats',async t=>{
  const {router,workers}=fixture();t.after(()=>router.cancelTimers());
  await router.route({id:1,method:'thread/resume',params:{threadId:'other'}},()=>{});
  assert.deepEqual(await router.releaseIdle({threadId:'unowned'}),
-  {released:true,writerWorkers:0,reason:''});
+  {released:false,writerWorkers:0,reason:'not-owned'});
  assert.equal(workers[0].closed,false);
+});
+
+test('manual release verifies an external writer and never reports success',async t=>{
+ const {router,workers}=fixture();t.after(()=>router.cancelTimers());
+ const create=router.createWorker;
+ router.createWorker=options=>{
+  const worker=create(options),request=worker.request.bind(worker);
+  worker.request=async(method,params)=>{
+   if(method==='thread/resume')throw Error('thread t already has an active writer');
+   return request(method,params);
+  };return worker;
+ };
+ const result=await router.releaseIdle({threadId:'t',force:true});
+ assert.equal(result.released,false);assert.equal(result.reason,'external-writer');
+ assert.equal(workers.length,1);assert.equal(workers[0].closed,true);
 });
 
 test('normal worker exit only retires its mapping without forcing any process',()=>{

@@ -57,18 +57,15 @@ struct SettingsView: View {
 
     /// 放锁是**显式**动作。
     ///
-    /// 它会重启电脑端的手机 app-server：排队消息会丢、十几秒连不上。
-    /// 所以不能自动做，只能用户自己按。
-    /// 需要它的时候：桌面 Codex 弹「已在另一个应用中打开」。
+    /// 只回收手机桥接持有且确认空闲的写进程。
     @ViewBuilder
     private var lockRow: some View {
-        Button("释放电脑端会话锁") {
+        Button("释放当前会话占用") {
             updateMsg = "正在释放…"
             Task { @MainActor in updateMsg = await store.releaseWriterLocks() }
         }
         .font(Palette.F.note).frame(minHeight: 44)
-        Text("手机打开过或发过消息的会话会占住电脑端的锁。"
-             + "电脑上打不开某个会话时按这个。")
+        Text("释放手机持有的空闲会话。若由电脑 Codex 占用，会提示你关闭电脑上的该会话。")
             .font(Palette.F.caption)
             .foregroundStyle(Palette.textFaint)
     }

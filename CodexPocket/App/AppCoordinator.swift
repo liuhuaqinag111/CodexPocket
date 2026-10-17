@@ -526,7 +526,7 @@ final class AppCoordinator: ObservableObject {
         guard let url = settings.bridge(path: "/release-writers", query: query) else { return "连接地址无效" }
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
-        req.timeoutInterval = 5
+        req.timeoutInterval = 20
         do {
             let (data, response) = try await NetSession.shared.data(for: req)
             guard (response as? HTTPURLResponse)?.statusCode == 200,
@@ -549,6 +549,8 @@ final class AppCoordinator: ObservableObject {
             return "已释放空闲会话，连接保持正常"
         }
         switch result.str("reason") {
+        case "external-writer": return "会话由电脑 Codex 持有，请在电脑关闭该会话后重试"
+        case "not-owned": return "未确认会话锁已释放，请重新打开会话后重试"
         case "active-turn": return "仍有回复正在生成，结束后会自动释放"
         case "cooldown": return "刚释放过，请稍后再试"
         default: return "当前状态还没确认，暂不释放；稍后再试"

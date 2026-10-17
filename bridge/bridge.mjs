@@ -527,7 +527,7 @@ const server = http.createServer((req, res) => {
   // 手机手动释放锁走这里，避免旧的 /release 为了放锁重启上游、丢掉在途请求。
   if (u.pathname === '/release-writers') {
     if (!authed(req)) { res.writeHead(401).end('unauthorized'); return; }
-    void writers.releaseIdle({threadId:u.searchParams.get('threadId')||undefined}).then(result => {
+    void writers.releaseIdle({threadId:u.searchParams.get('threadId')||undefined,force:true}).then(result => {
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify(result));
     }).catch(error => {
