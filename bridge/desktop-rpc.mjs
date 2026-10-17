@@ -5,7 +5,7 @@ import {randomUUID} from 'node:crypto';
 
 export function desktopEndpoint({platform=process.platform,env=process.env,home=os.homedir()}={}){
  return env.CODEX_DESKTOP_IPC || (platform==='win32'?'\\\\.\\pipe\\codex-ipc':
-  path.join(env.CODEX_HOME||path.join(home,'.codex'),'ipc','ipc.sock'));
+  path.posix.join(env.CODEX_HOME||path.posix.join(home,'.codex'),'ipc','ipc.sock'));
 }
 export async function desktopRequest(method,params,{targetClientId,timeoutMs=5000,
  endpoint=desktopEndpoint()}={}){
