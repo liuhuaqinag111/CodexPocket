@@ -53,7 +53,8 @@ final class FilesModel: ObservableObject {
 
     init(repository: FileRepositoryProtocol, root: String) {
         self.repository = repository
-        let path = ComputerPath.normalized(root.isEmpty ? "/" : root)
+        var path = root.isEmpty ? "/" : root
+        while path.count > 1 && path.hasSuffix("/") { path.removeLast() }
         self.root = path
         currentPath = self.root
     }
@@ -64,10 +65,10 @@ final class FilesModel: ObservableObject {
     var rows: [FileTreeRow] { treeRows(in: currentPath, depth: 0) }
 
     var breadcrumbs: [FileBreadcrumb] {
-        let name = ComputerPath.lastComponent(root)
-        var result = [FileBreadcrumb(path: root, name: name.isEmpty ? "/" : name)]
-        guard ComputerPath.comparisonKey(currentPath) != ComputerPath.comparisonKey(root) else { return result }
-        let relative = currentPath.dropFirst(root.hasSuffix("/") ? root.count : root.count + 1)
+        var result = [FileBreadcrumb(path: root, name: (root as NSString).lastPathComponent.isEmpty
+                                    ? "/" : (root as NSString).lastPathComponent)]
+        guard currentPath != root else { return result }
+        let relative = currentPath.dropFirst(root == "/" ? 1 : root.count + 1)
         var path = root
         for part in relative.split(separator: "/") {
             path = FileBrowser.join(path, String(part))
@@ -77,7 +78,6 @@ final class FilesModel: ObservableObject {
     }
 
     func enterDirectory(_ path: String) {
-        let path = ComputerPath.normalized(path)
         guard isWithinRoot(path), !isBusy else { return }
         currentPath = path
         query = ""
@@ -104,11 +104,10 @@ final class FilesModel: ObservableObject {
     }
 
     private func isWithinRoot(_ path: String) -> Bool {
-        ComputerPath.contains(path, in: root)
+        path == root || path.hasPrefix(root == "/" ? "/" : root + "/")
     }
 
     func openFile(_ path: String) {
-        let path = ComputerPath.normalized(path)
         guard isWithinRoot(path), !isBusy, document == nil else { return }
         openingPath = path
         fileError = nil
@@ -203,18 +202,15 @@ final class FilesModel: ObservableObject {
     }
 
     func retryDirectory(_ path: String) {
-        let path = ComputerPath.normalized(path)
         let visibleExpanded = rows.filter {
             $0.entry.isDir && expandedPaths.contains($0.path)
-                && ComputerPath.contains($0.path, in: path)
-                && ComputerPath.comparisonKey($0.path) != ComputerPath.comparisonKey(path)
+                && $0.path.hasPrefix(path.hasSuffix("/") ? path : path + "/")
         }.map(\.path)
         loadDirectory(path, force: true)
         for child in visibleExpanded { loadDirectory(child, force: true) }
     }
 
     func toggleDirectory(_ path: String) {
-        let path = ComputerPath.normalized(path)
         guard isWithinRoot(path) else { return }
         if expandedPaths.contains(path) { expandedPaths.remove(path) }
         else {

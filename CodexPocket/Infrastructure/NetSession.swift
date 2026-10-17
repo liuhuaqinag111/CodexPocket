@@ -1,30 +1,11 @@
 import Foundation
 import CryptoKit
-import Security
 
-enum EndpointTrust {
-    /// HTTP 与 WebSocket 的安全通道共享一个 host:port 作用域。
-    static func key(host: String, port: Int) -> String {
-        let normalized = host.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
-        let authority = "https://\(normalized):\(port)"
-        let hash = SHA256.hash(data: Data(authority.utf8))
-            .map { String(format: "%02x", $0) }.joined()
-        return "certificateSHA256." + hash
-    }
-
-    static func pin(host: String, port: Int) -> String? {
-        Keychain.get(key(host: host, port: port))
-    }
-
-    @discardableResult
-    static func save(_ pin: String?, for endpoint: URL,
-                     write: (String, String) -> OSStatus = Keychain.set) -> OSStatus {
-        guard endpoint.scheme == "wss", let host = endpoint.host else { return errSecSuccess }
-        return write(pin ?? "", key(host: host, port: endpoint.port ?? 443))
-    }
-}
-
-/// HTTP 与 WebSocket 共用系统 TLS 信任及用户明确导入的端点证书。
+/// 走桥接的 HTTP 请求（取图 / 传图）。
+///
+/// **不能用 `URLSession.shared`**：直连 IP 时服务端是一张自签证书，
+/// 系统信任链过不了，请求直接失败（取图会一直白框）。
+/// 这里跟 WebSocket 用同一枚内置指纹，走同一套信任判断。
 enum NetSession {
     static let shared: URLSession = {
         let cfg = URLSessionConfiguration.default
@@ -44,8 +25,7 @@ enum NetSession {
                 completionHandler(.performDefaultHandling, nil)
                 return
             }
-            guard let expected = EndpointTrust.pin(host: challenge.protectionSpace.host,
-                                                 port: challenge.protectionSpace.port) else {
+            if SecTrustEvaluateWithError(trust, nil) {
                 completionHandler(.performDefaultHandling, nil)
                 return
             }
@@ -56,7 +36,7 @@ enum NetSession {
                 return
             }
             let fp = SHA256.hash(data: der).map { String(format: "%02X", $0) }.joined()
-            if fp == expected {
+            if fp == WebSocketTransport.pinnedCertSHA256 {
                 completionHandler(.useCredential, URLCredential(trust: trust))
             } else {
                 completionHandler(.cancelAuthenticationChallenge, nil)

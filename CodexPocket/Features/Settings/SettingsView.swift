@@ -4,7 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var store: AppCoordinator
     @Environment(\.dismiss) private var dismiss
-    @State private var showPairing = false
+    @State private var showToken = false
 
     private var s: PreferencesModel { store.settings }
 
@@ -145,15 +145,43 @@ struct SettingsView: View {
                 }
                 .listRowBackground(Palette.bg)
                 Section {
-                    LabeledContent("电脑", value: s.computerName.isEmpty ? "未命名电脑" : s.computerName)
-                    LabeledContent("连接地址", value: s.host)
-                        .textSelection(.enabled)
-                    Button {
-                        store.pairingCandidate = nil
-                        store.pairingError = nil
-                        showPairing = true
-                    } label: {
-                        LucideLabel("重新配对电脑", "monitor").frame(minHeight: 44)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("服务器").font(Palette.F.caption).foregroundStyle(Palette.textSub)
+                        TextField("域名", text: bind(\.host))
+                            .font(Palette.F.body)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                            .accessibilityIdentifier("settings.host")
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("端口").font(Palette.F.caption).foregroundStyle(Palette.textSub)
+                        TextField("443", text: bind(\.port))
+                            .font(Palette.F.body)
+                            .keyboardType(.numberPad)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text("令牌").foregroundStyle(Palette.textSub)
+                            Spacer()
+                            Button(showToken ? "隐藏" : "显示") { showToken.toggle() }
+                                .font(Palette.F.caption).frame(minWidth: 44, minHeight: 44)
+                        }
+                        if showToken {
+                            TextField("token", text: bind(\.token), axis: .vertical)
+                                .font(.subheadline.monospaced())
+                                .lineLimit(1...3)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .accessibilityIdentifier("settings.token")
+                        } else {
+                            Text(s.token.isEmpty ? "未设置"
+                                 : String(s.token.prefix(10)) + "…")
+                                .font(.subheadline.monospaced())
+                                .foregroundStyle(Palette.textFaint)
+                        }
+                    }
+                    Button { s.host = ""; s.port = "443" } label: {
+                        LucideLabel("填入服务器地址", "globe").frame(minHeight: 44)
                     }
                 } header: {
                     header("连接")
@@ -262,13 +290,15 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("完成") {
+                        if store.rpc.url != s.url || store.rpc.token != s.token { store.connect() }
                         dismiss()
                     }
                     .font(Palette.F.note.weight(.semibold)).frame(minHeight: 44)
                 }
             }
         }
-        .sheet(isPresented: $showPairing) { PairingView(isInitial: false) }
-
+        .onDisappear {
+            if store.rpc.url != s.url || store.rpc.token != s.token { store.connect() }
+        }
     }
 }

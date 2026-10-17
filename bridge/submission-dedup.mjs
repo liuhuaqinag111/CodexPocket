@@ -1,8 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash,randomUUID} from 'node:crypto';
-import {runtimePaths} from './runtime-paths.mjs';
-import {syncDirectory} from './durable-files.mjs';
 
 const UNKNOWN={code:-32091,message:'提交结果未知，请先查询会话历史或队列'};
 const rejected=e=>e&&([-32600,-32601,-32602].includes(e.code)||
@@ -12,7 +10,7 @@ const acknowledged=record=>record?.state==='ack'&&record.result&&
 
 export class SubmissionDedup {
  constructor({directory}={}) {
-  this.directory=directory||runtimePaths().submissions;
+  this.directory=directory||path.join(process.env.CODEX_PHONE_DIR||process.env.HOME+'/.codex/phone','submissions');
   this.rows=new Map();
   this.revision=0;
  }
@@ -28,7 +26,7 @@ export class SubmissionDedup {
   const file=await fs.open(tmp,'wx',0o600);
   try {await file.writeFile(JSON.stringify(value));await file.sync();}finally{await file.close();}
   await fs.rename(tmp,name);
-  await syncDirectory(this.directory);
+  const dir=await fs.open(this.directory,'r');try{await dir.sync();}finally{await dir.close();}
  }
  async prepare(key) {
   try {

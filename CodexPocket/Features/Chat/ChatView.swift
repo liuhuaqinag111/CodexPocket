@@ -163,29 +163,33 @@ extension ChatView {
             .opacity(0.01)
             .accessibilityElement()
             .accessibilityIdentifier("chatState")
-            .accessibilityValue(chatStateValue)
-    }
-
-    private var chatStateValue: String {
-        let probes = derivedProbes()
-        let requestState = WebSocketTransport.outbound
-            .map { "\($0.key):\($0.value)" }.sorted().joined(separator: ",")
-        let last = chat.items.last
-        return [
-            "y=\(Int(probe.offY)) vh=\(Int(probe.viewportH))",
-            "latest=\(showLatest ? 1 : 0) hold=\(probe.hold ? 1 : 0) lt=\(latestTaps) fg=\(followGen) sa=\(atBottom ? 0 : 1) ch=\(Int(probe.contentH))",
-            "bot=\(atBottom ? 1 : 0) n=\(chat.items.count) br=\(Self.bodyRuns) bms=\(Int(Self.bodyMs))",
-            "bslow=\(Self.bodySlow) bmax=\(Int(Self.bodyMax)) req=\(requestState)",
-            "rp=\(chat.remotePolls) ra=\(chat.remoteActive) re=\(chat.remoteErr.prefix(20)) rs=\(chat.remoteStatus)",
-            "busy=\(chat.busy ? 1 : 0) tk=\(chat.tick) buf=\(chat.buf.count) st=\(store.state.label)",
-            "last=\(last?.id.prefix(6) ?? "-")/\(last?.text.count ?? 0) cid=\(chat.current?.id.prefix(6) ?? "-")",
-            "cwd=\(chat.current?.cwd ?? "-") nc=\(list.lastCreatedCwd ?? "-")",
-            "ag=\(probes.ag) ord=\(probes.ord) raw=\(probes.raw) tb=\(probes.tb)",
-            "fz=\(Int(FreezeWatchdog.maxStallMs)) fs=\(FreezeWatchdog.stallCount) fst=\(FreezeWatchdog.stage)",
-            "rb=\(RootView.bodyRuns) rms=\(Int(RootView.bodyMs)) rmax=\(Int(RootView.bodyMax))",
-            "cp=\(chat.configurationPreparing ? 1 : 0) warm=\(chat.warmMs) net=\(chat.netMs)",
-            "sw=\(chat.lastSendWhy.prefix(40))"
-        ].joined(separator: " ")
+            .accessibilityValue("y=\(Int(probe.offY)) vh=\(Int(probe.viewportH)) "
+                                + "latest=\(showLatest ? 1 : 0) "
+                                + "hold=\(probe.hold ? 1 : 0) lt=\(latestTaps) fg=\(followGen) sa=\(atBottom ? 0 : 1) ch=\(Int(probe.contentH)) "
+                                + "bot=\(atBottom ? 1 : 0) n=\(chat.items.count) "
+                                + "br=\(Self.bodyRuns) bms=\(Int(Self.bodyMs)) "
+                                + "bslow=\(Self.bodySlow) bmax=\(Int(Self.bodyMax)) "
+                                + "req=\(WebSocketTransport.outbound.map { "\($0.key):\($0.value)" }.sorted().joined(separator: ",")) "
+                                + "rp=\(chat.remotePolls) ra=\(chat.remoteActive) re=\(chat.remoteErr.prefix(20)) rs=\(chat.remoteStatus) "
+                                + "busy=\(chat.busy ? 1 : 0) tk=\(chat.tick) "
+                                + "buf=\(chat.buf.count) st=\(store.state.label) "
+                                + "last=\(chat.items.last?.id.prefix(6) ?? "-")"
+                                + "/\(chat.items.last?.text.count ?? 0) "
+                                + "cid=\(chat.current?.id.prefix(6) ?? "-") "
+                                + "cwd=\(chat.current?.cwd ?? "-") "
+                                + "nc=\(list.lastCreatedCwd ?? "-") "
+                                + "ag=\(derivedProbes().ag) "
+                                + "ord=\(derivedProbes().ord) "
+                                + "raw=\(derivedProbes().raw) "
+                                + "tb=\(derivedProbes().tb) "
+                                + "fz=\(Int(FreezeWatchdog.maxStallMs)) "
+                                + "fs=\(FreezeWatchdog.stallCount) "
+                                + "fst=\(FreezeWatchdog.stage) "
+                                + "rb=\(RootView.bodyRuns) rms=\(Int(RootView.bodyMs)) "
+                                + "rmax=\(Int(RootView.bodyMax)) "
+                                + "cp=\(chat.configurationPreparing ? 1 : 0) "
+                                + "warm=\(chat.warmMs) net=\(chat.netMs) "
+                                + "sw=\(chat.lastSendWhy.prefix(40))")
     }
 }
 

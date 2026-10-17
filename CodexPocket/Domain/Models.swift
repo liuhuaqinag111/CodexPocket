@@ -74,7 +74,7 @@ struct Project: Identifiable, Hashable {
     /// 否则按工作目录前缀匹配（跟桌面端一致）。
     func owns(_ t: Thread) -> Bool {
         if !t.cwd.isEmpty {
-            for r in roots where ComputerPath.contains(t.cwd, in: r) {
+            for r in roots where t.cwd == r || t.cwd.hasPrefix(r.hasSuffix("/") ? r : r + "/") {
                 return true
             }
         }

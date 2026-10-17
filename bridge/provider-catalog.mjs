@@ -17,8 +17,6 @@ function tomlString(value) {
   return text.split('#', 1)[0].trim();
 }
 
-// CC Switch stores the provider's TOML as text. We only read the scalar keys
-// needed to identify the endpoint and model; no TOML is written or re-emitted.
 function parseProviderConfig(text) {
   let section = '';
   const values = new Map();
@@ -41,17 +39,55 @@ function parseProviderConfig(text) {
   };
 }
 
-function readActiveProvider(dbPath) {
+// 从代理 /status 拿当前活跃 provider id，超时或失败返回 null。
+async function fetchLiveProviderId(address, port, fetchImpl) {
+  try {
+    const resp = await fetchImpl(`http://${address}:${port}/status`, {
+      signal: AbortSignal.timeout(2_000),
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return typeof data.current_provider_id === 'string' && data.current_provider_id
+      ? data.current_provider_id : null;
+  } catch { return null; }
+}
+
+// 读代理配置拿地址和端口。
+function readProxyConfig(dbPath) {
   if (!dbPath || !fs.existsSync(dbPath)) return null;
   let db;
   try {
     db = new DatabaseSync(dbPath, { readOnly: true });
     const row = db.prepare(
-      'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND is_current = 1 LIMIT 1',
+      'SELECT listen_address, listen_port FROM proxy_config WHERE app_type = ? AND enabled = 1 LIMIT 1',
     ).get('codex');
+    if (!row) return null;
+    return { address: String(row.listen_address || '127.0.0.1'), port: Number(row.listen_port || 15721) };
+  } catch { return null; }
+  finally { try { db?.close(); } catch {} }
+}
+
+function readActiveProvider(dbPath, liveProviderId) {
+  if (!dbPath || !fs.existsSync(dbPath)) return null;
+  let db;
+  try {
+    db = new DatabaseSync(dbPath, { readOnly: true });
+    // 优先用代理实时 id，兜底才用 is_current。
+    const row = liveProviderId
+      ? db.prepare(
+          'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND id = ? LIMIT 1',
+        ).get('codex', liveProviderId)
+        ?? db.prepare(
+          'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND is_current = 1 LIMIT 1',
+        ).get('codex')
+      : db.prepare(
+          'SELECT id, name, settings_config FROM providers WHERE app_type = ? AND is_current = 1 LIMIT 1',
+        ).get('codex');
     if (!row) return null;
     const settings = JSON.parse(row.settings_config || '{}');
     const config = parseProviderConfig(settings.config);
+    // modelCatalog 字段包含该分组的完整模型列表，优先使用。
+    const catalogModels = settings.modelCatalog?.models;
     const selected = config.modelProvider;
     const auth = settings.auth && typeof settings.auth === 'object' ? settings.auth : {};
     const token = typeof auth.OPENAI_API_KEY === 'string' ? auth.OPENAI_API_KEY : '';
@@ -62,7 +98,7 @@ function readActiveProvider(dbPath) {
     return {
       id: String(row.id), name: String(row.name || row.id), fingerprint,
       model: config.model, modelProvider: selected, baseURL: config.baseURL,
-      wireAPI: config.wireAPI, token,
+      wireAPI: config.wireAPI, token, catalogModels: Array.isArray(catalogModels) ? catalogModels : null,
     };
   } finally { try { db?.close(); } catch {} }
 }
@@ -78,6 +114,16 @@ function normalizeModels(body) {
   }));
 }
 
+// 从 modelCatalog 字段直接构建模型列表，不发网络请求。
+function normalizeCatalogModels(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows.filter(r => r && (r.model || r.id)).map(r => ({
+    id: r.model || r.id,
+    name: r.displayName || r.display_name || r.model || r.id,
+    detail: '',
+  }));
+}
+
 export function clearProviderCatalogCache() { cache.clear(); }
 
 export async function loadProviderCatalog({
@@ -86,12 +132,37 @@ export async function loadProviderCatalog({
   ttlMs = DEFAULT_TTL_MS,
   now = () => Date.now(),
 } = {}) {
+  // 1. 拿代理实时 provider id
+  const proxyConf = readProxyConfig(dbPath);
+  const liveId = proxyConf ? await fetchLiveProviderId(proxyConf.address, proxyConf.port, fetchImpl) : null;
+
+  // 2. 读 provider 行
   let provider;
-  try { provider = readActiveProvider(dbPath); }
+  try { provider = readActiveProvider(dbPath, liveId); }
   catch { return {available:true,models:[],error:'暂时无法读取 CC Switch 当前分组，请重试'}; }
   if (!provider || !provider.baseURL) return { available: false, models: [], reason: 'cc-switch-unavailable' };
+
   const cached = cache.get(provider.fingerprint);
   if (cached && now() - cached.at < ttlMs) return cached.value;
+
+  // 3. 优先从 modelCatalog 字段拿模型列表，无需额外网络请求。
+  if (provider.catalogModels && provider.catalogModels.length > 0) {
+    const models = normalizeCatalogModels(provider.catalogModels);
+    if (models.length > 0) {
+      const value = {
+        available: true,
+        provider: { id: provider.id, name: provider.name, fingerprint: provider.fingerprint,
+          model: provider.model, modelProvider: provider.modelProvider, baseURL: provider.baseURL,
+          wireAPI: provider.wireAPI },
+        models,
+      };
+      cache.set(provider.fingerprint, { at: now(), value });
+      while(cache.size>4)cache.delete(cache.keys().next().value);
+      return value;
+    }
+  }
+
+  // 4. 兜底：请求 /models 接口。
   const endpoint = provider.baseURL.replace(/\/+$/, '') + '/models';
   try {
     const response = await fetchImpl(endpoint, {

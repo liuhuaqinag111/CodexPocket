@@ -61,7 +61,8 @@ final class WebSocketTransport: NSObject {
         // 20 秒对一条"十几秒才有一个 tick"的链路太紧，正常空闲也会被掐。
         // 判活交给 probe / 心跳，不靠这个。
         cfg.timeoutIntervalForRequest = 3600
-        // 默认使用系统 TLS 信任；只对用户导入的端点使用证书指纹。
+        // delegate 用来做证书固定：直连 IP 时服务端是自签证书，
+        // 系统链校验过不了，靠内置指纹认。
         return URLSession(configuration: cfg, delegate: NetSession.Pinner(), delegateQueue: nil)
     }()
     var seq = 0
@@ -150,6 +151,20 @@ final class WebSocketTransport: NSObject {
                                   connectedDurationSeconds: dur)
     }
 
+
+    /// 直连 IP 时用的服务端证书指纹（SHA256，十六进制，大写无冒号）。
+    ///
+    /// 为什么需要：阿里云对"未备案域名解析到它的 IP"做 SNI 拦截
+    /// （实测 SNI=czw.kdns.fr 直连 20 次被 RST 19 次，换成别的 SNI 或
+    /// 不带 SNI 就放行）。所以 App 改成直连 IP —— 实测 iOS 连 IP 时
+    /// ClientHello 里**根本没有 server_name 扩展**（tcpdump 抓包确认），
+    /// 阿里云无从识别，链路就通了（建连 279ms、往返 244ms，
+    /// 而走 Cloudflare 是 1425ms）。
+    ///
+    /// 代价是 IP 直连没有可信任的证书（Let's Encrypt 不签发 IP 证书），
+    /// 所以服务端用一张带 `IP:8.148.8.23` 的自签证书，
+    /// App 这边只认这一枚指纹 —— 不装描述文件，也不放行任意证书。
+    static let pinnedCertSHA256 = "755AB119DE8DE610678C0EA90C3AF433E10A371BAA9214E62DC973B348CA2EC6"
 
     struct RPCError: LocalizedError, CustomNSError {
         let message: String

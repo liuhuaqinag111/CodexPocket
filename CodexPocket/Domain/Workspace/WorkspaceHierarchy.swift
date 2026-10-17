@@ -50,12 +50,8 @@ struct WorkspaceWorktreeGroup: Identifiable, Hashable {
 
     static func contains(_ cwd: String, in root: String) -> Bool {
         guard !cwd.isEmpty, !root.isEmpty else { return false }
-        let directory = ComputerPath.normalized(cwd)
-        let base = ComputerPath.normalized(root)
-        if ComputerPath.isWindows(directory) || ComputerPath.isWindows(base) {
-            return ComputerPath.contains(directory, in: base)
-        }
-        return ComputerPath.contains((directory as NSString).standardizingPath,
-                                     in: (base as NSString).standardizingPath)
+        let directory = (cwd as NSString).standardizingPath
+        let base = (root as NSString).standardizingPath
+        return directory == base || directory.hasPrefix(base == "/" ? base : base + "/")
     }
 }

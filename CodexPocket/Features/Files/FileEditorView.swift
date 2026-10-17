@@ -27,7 +27,7 @@ struct FileEditorView: View {
             .background(Palette.bg)
             .tint(Palette.accentText)
             .toolbarBackground(Palette.bg, for: .navigationBar)
-            .navigationTitle(ComputerPath.lastComponent(model.document?.path ?? ""))
+            .navigationTitle(((model.document?.path ?? "") as NSString).lastPathComponent)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { editorToolbar }
             .safeAreaInset(edge: .bottom, spacing: 0) { editorFooter }
