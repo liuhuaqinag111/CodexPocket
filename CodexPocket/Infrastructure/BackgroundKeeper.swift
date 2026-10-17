@@ -26,7 +26,7 @@ final class BackgroundKeeper {
     private var running = false
     /// 系统按资源情况调度，不保证启动时间或持续运行。
     private var procTask: BGProcessingTask?
-    static let procID = "com.liuhuaqiang.codexpocket.refresh"
+    static let procID = "app.codexpocket.ios.refresh"
 
     /// App 启动就调：把会话和中断监听先装上。
     func prepare() {

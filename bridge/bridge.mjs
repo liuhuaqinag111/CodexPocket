@@ -1,8 +1,8 @@
 import http from 'node:http';
 import { StdioWorker } from './stdio-worker.mjs';
+import { withProviderExecution } from './provider-execution.mjs';
 import { WriterRouter } from './writer-router.mjs';
 import { loadProviderCatalog } from './provider-catalog.mjs';
-import { withProviderExecution } from './provider-execution.mjs';
 import { withAllProviders } from './list-params.mjs';
 import { withDesktopProjectless } from './desktop-projectless.mjs';
 import { ListFast } from './list-fast.mjs';
@@ -11,6 +11,8 @@ import { SubmissionDedup } from './submission-dedup.mjs';
 import { requestSocket } from './socket-request.mjs';
 import { ApprovalRoutes } from './approval-routes.mjs';
 import { restartIdleUpstream } from './upstream-maintenance.mjs';
+import { runtimePaths } from './runtime-paths.mjs';
+import { installManagedShutdown } from './managed-shutdown.mjs';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -23,6 +25,7 @@ const PORT = Number(process.env.PORT || 62113);
 const BIND = process.env.BIND || '127.0.0.1';
 const UI = new URL('./ui.html', import.meta.url);
 const APP_SCHEME = process.env.APP_SCHEME || 'codexpocket';
+const PATHS = runtimePaths();
 
 function authed(req) {
   const u = new URL(req.url, 'http://x');
@@ -44,8 +47,7 @@ function log(...a) { console.log(new Date().toISOString(), ...a); }
 const clients = new Set();
 const approvals=new ApprovalRoutes({broadcast:message=>broadcast(JSON.stringify(message)),log});
 const submissions = new SubmissionDedup({
-  directory: process.env.SUBMISSION_DIR
-    || `${process.env.CODEX_PHONE_DIR || process.env.HOME + '/.codex/phone'}/submissions`,
+  directory: PATHS.submissions,
 });
 let up = null;
 let upReady = false;
@@ -67,7 +69,8 @@ const writerBinary = process.env.CODEX_BIN || [
 ].find(path => fs.existsSync(path));
 const writers = new WriterRouter({
  delay: Number(process.env.WRITER_RELEASE_MS ?? 1500),
- createWorker: callbacks => new StdioWorker({binary:writerBinary,spawnProcess:withProviderExecution(),log,...callbacks}),
+ createWorker: callbacks => new StdioWorker({binary:writerBinary,log,
+   spawnProcess: withProviderExecution(), ...callbacks}),
  log,
  onNotification:(method,params) => {
   if(listEvents.has(method))listFast.invalidate();
@@ -86,7 +89,7 @@ const writers = new WriterRouter({
 // 为什么要桥接来记：服务端**只在跑回合时推一次**这条事件，手机不在线
 // 那一包就永远没了 —— 打开老会话的用量页永远是"这个会话还没跑过"。
 // 桥接是常驻进程，替它记在磁盘上。
-const USAGE_FILE = process.env.HOME + '/.codex/phone/usage.json';
+const USAGE_FILE = PATHS.usage;
 let usage = {};
 let usageWriteScheduled = false;
 let usageWrite = Promise.resolve();
@@ -104,7 +107,7 @@ function saveUsage(tid, u) {
   setTimeout(() => {
     usageWriteScheduled = false;
     usageWrite = usageWrite.then(async () => {
-      await fs.promises.mkdir(process.env.HOME + '/.codex/phone', { recursive: true });
+      await fs.promises.mkdir(PATHS.directory, { recursive: true });
       await fs.promises.writeFile(USAGE_FILE, JSON.stringify(usage));
     }).catch(error => log('[usage] write failed', error.message));
   }, 50).unref?.();
@@ -524,7 +527,7 @@ const server = http.createServer((req, res) => {
   // 手机手动释放锁走这里，避免旧的 /release 为了放锁重启上游、丢掉在途请求。
   if (u.pathname === '/release-writers') {
     if (!authed(req)) { res.writeHead(401).end('unauthorized'); return; }
-    void writers.releaseIdle({threadId:u.searchParams.get('threadId')||undefined,force:true}).then(result => {
+    void writers.releaseIdle({threadId:u.searchParams.get('threadId')||undefined}).then(result => {
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify(result));
     }).catch(error => {
@@ -569,7 +572,7 @@ const server = http.createServer((req, res) => {
   // 版本号取自 IPA 文件本身（ship.sh 写一份 .version 在旁边），不是进程里
   // 的常量 —— 桥接可能比 IPA 早/晚重启，读文件才是真值。
   if (u.pathname === '/version') {
-    const ipa = process.env.IPA_PATH || (process.env.HOME + '/Desktop/CodexPocket.ipa');
+    const ipa = PATHS.ipa;
     let build = '';
     let mtime = 0;
     try {
@@ -592,7 +595,7 @@ const server = http.createServer((req, res) => {
   // 时候才给这个链接。这里先把端点备好，签名链路一通就能用。
   if (u.pathname === '/manifest') {
     const ipa = u.searchParams.get('ipa') || '';
-    const bundle = u.searchParams.get('bundle') || 'com.liuhuaqiang.codexpocket';
+    const bundle = u.searchParams.get('bundle') || 'app.codexpocket.ios';
     const ver = u.searchParams.get('version') || '1.0';
     const title = u.searchParams.get('title') || 'CodexPocket';
     if (!ipa.startsWith('https://')) {
@@ -618,7 +621,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   if (u.pathname === '/ipa' || u.pathname === '/CodexPocket.ipa') {
-    const f = process.env.IPA_PATH || (process.env.HOME + '/Desktop/CodexPocket.ipa');
+    const f = PATHS.ipa;
     fs.stat(f, (e, st) => {
       if (e) { res.writeHead(404).end('ipa not found'); return; }
       res.writeHead(200, {
@@ -644,7 +647,7 @@ const server = http.createServer((req, res) => {
   if (u.pathname === '/upload' && req.method === 'POST') {
     const name = (u.searchParams.get('name') || 'image.jpg')
       .replace(/[^A-Za-z0-9._-]/g, '').slice(-60) || 'image.jpg';
-    const dir = '/tmp/codex-pocket';
+    const dir = PATHS.uploads;
     const chunks = [];
     let tooLarge = false;
     let n = 0;
@@ -690,7 +693,7 @@ const server = http.createServer((req, res) => {
     let n = 0;
     req.on('data', (c) => { n += c.length; if (n <= 8 * 1024 * 1024) chunks.push(c); else tooLarge = true; });
     req.on('end', async () => {
-      const f = process.env.HOME + '/.codex/phone/frames.log';
+      const f = PATHS.frames;
       const buf = Buffer.concat(chunks);
       if (tooLarge) {
         res.writeHead(413, { 'content-type': 'application/json', connection: 'close' });
@@ -698,7 +701,7 @@ const server = http.createServer((req, res) => {
         return;
       }
       try {
-        await fs.promises.mkdir(process.env.HOME + '/.codex/phone', { recursive: true });
+        await fs.promises.mkdir(PATHS.directory, { recursive: true });
         await fs.promises.writeFile(f, buf);
       } catch(error) {
         res.writeHead(500, { 'content-type': 'application/json' });
@@ -906,4 +909,5 @@ server.listen(PORT, BIND, () => {
   connectUpstream();
 });
 
-process.on('SIGTERM', () => { try { up?.close(); } catch {} process.exit(0); });
+const shutdown = installManagedShutdown({ workers: writers, upstream: () => up });
+process.once('SIGTERM', () => void shutdown());

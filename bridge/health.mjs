@@ -6,11 +6,13 @@
 // 只探 readyz 或只拉列表都会漏判 —— 手机端的表现就是"新会话建不了、
 // 点了没反应"，但界面看起来是"已连接"。
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { WebSocket } from 'ws';
 
 const port = process.argv[2] || '62115';
 const tok = fs.readFileSync(process.env.TOKEN_FILE ||
-  `${process.env.HOME}/.codex/phone-token`, 'utf8').trim();
+  path.join(os.homedir(),'.codex','phone-token'), 'utf8').trim();
 
 const ws = new WebSocket(`ws://127.0.0.1:${port}`, {
   headers: { Authorization: `Bearer ${tok}` },

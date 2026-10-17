@@ -17,25 +17,15 @@ struct ImageThumb: View {
     @State private var retry = 0
     @State private var loadedURL: String?
     private struct LoadID: Hashable { let url: String; let retry: Int }
-    private var source: String {
-        if url.hasPrefix("file:"), let file = URL(string: url) { return file.path }
-        return url.hasPrefix("/") ? (url.removingPercentEncoding ?? url) : url
-    }
+    private var source: String { ComputerPath.imageSource(url) }
 
-    /// 电脑上的绝对路径（agent 截图、手机刚传上去的图）。
-    ///
-    /// 手机读不到 `/Users/...`，要走桥接的 `/file?path=` 代理。
-    /// 区分办法：手机自己的临时目录只有 `/var/mobile` 这一支。
-    private var isMacPath: Bool {
-        guard source.hasPrefix("/") else { return false }
-        return !source.hasPrefix("/var/mobile") && !source.hasPrefix("/private/var/mobile")
-    }
-
-    private var isRemote: Bool { url.hasPrefix("http") || isMacPath }
+    /// 电脑路径经桥接读取，手机沙盒中的图片直接读取。
+    private var isRemote: Bool { ComputerPath.isRemoteImage(url) }
 
     /// 走桥接取图。域名/端口/令牌跟主连接用同一份设置。
     private var fetchURL: URL? {
-        if url.hasPrefix("http") { return URL(string: url) }
+        if let remote = URL(string: url), let scheme = remote.scheme?.lowercased(),
+           ["http", "https"].contains(scheme) { return remote }
         return store.settings.bridge(path: "/file",
                                      query: [URLQueryItem(name: "path", value: source)])
     }

@@ -15,8 +15,8 @@ export class StdioWorker {
     this.serverRequests = new Set();
     this.sequence = 0;
     this.queued = 0;
-    const stdioArgs = (env || process.env).CODEX_APP_SERVER_STDIO === 'default' ? ['app-server'] : ['app-server', '--stdio'];
-    this.child = spawnProcess(binary, stdioArgs, {
+    const args=env.CODEX_APP_SERVER_STDIO==='default'?['app-server']:['app-server','--stdio'];
+    this.child = spawnProcess(binary, args, {
       cwd, env, stdio: ['pipe', 'pipe', 'pipe'],
     });
     this.exit = new Promise(resolve => { this.resolveExit = resolve; });

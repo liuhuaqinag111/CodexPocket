@@ -58,10 +58,10 @@ extension ComposerModel {
                 let base = roots[0]
                 self.suggestions = rows.prefix(20).compactMap { d in
                     guard let rel = d.str("path") else { return nil }
-                    let shown = base.hasSuffix("/") ? base + rel : base + "/" + rel
+                    let shown = FileBrowser.join(base, rel)
                     return Suggestions.Item(id: abs(shown.hashValue) > 0 ? shown : rel,
                                             insert: "@" + shown,
-                                            title: (rel as NSString).lastPathComponent,
+                                            title: ComputerPath.lastComponent(shown),
                                             detail: rel)
                 }
             }
@@ -71,9 +71,9 @@ extension ComposerModel {
     /// `@` 文件搜索的根目录：当前会话的 cwd；没有就用设置里的默认目录。
     func fileRoots() -> [String] {
         let cwd = chat.current?.cwd ?? ""
-        if !cwd.isEmpty, cwd.hasPrefix("/") { return [cwd] }
+        if !cwd.isEmpty, ComputerPath.isAbsolute(cwd) { return [cwd] }
         let d = settings.newThreadCwd
-        return d.hasPrefix("/") ? [d] : []
+        return ComputerPath.isAbsolute(d) ? [d] : []
     }
 }
 
